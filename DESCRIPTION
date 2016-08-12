@@ -1,0 +1,9 @@
+Package: uhcplots
+Type: Package
+Title: Used-Habitat Characteristics plots (UHC plots)
+Version: 0.1.0
+Author: John Fieberg, contributions from Althea ArchMiller
+Maintainer: John Fieberg <jfieberg@umn.edu>
+Description: More about what it does (maybe more than one line)
+License: What license is it under?
+LazyData: TRUE
