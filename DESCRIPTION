@@ -4,8 +4,10 @@ Title: Used-Habitat Calibration plots (UHC plots)
 Version: 0.1.0
 Author: John Fieberg, contributions from Althea ArchMiller
 Maintainer: John Fieberg <jfieberg@umn.edu>
-Description: Create UHC plots as described in Fieberg, Forester, Street,
-Johnson, ArchMiller, and Matthiopoulos. In Review. Species distribution models:
-predictive snipers or shots in the dark? Ecology Letters.
+Description: Create UHC plots as described in Fieberg, Forester, Street,Johnson,
+    ArchMiller, and Matthiopoulos. In Review. Species distribution models predictive
+    snipers or shots in the dark? Ecology Letters.
 License: MIT License
 LazyData: TRUE
+RoxygenNote: 5.0.1
+Imports: MASS
