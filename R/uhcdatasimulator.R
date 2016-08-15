@@ -2,11 +2,15 @@
 #'
 #' \code{uhcdatasimulator} simulates the data used in Fieberg et al. (In Review)
 #'
-#' This is a function that creates a dataframe based on the example and scenario
+#' This is a function that creates a dataframe based on the example
 #' chosen from the manuscript (Fieberg et al. In Review). In the first example,
 #' ("missing predictor") the distribution of a species is related to elevation
-#' and precipitation. In the second example ("non-linear"), the distribution of
-#' a species is non-linearly related to temperature.
+#' (\eqn{x_1}) and precipitation (\eqn{x_2}), where \eqn{x_1} and \eqn{x_2}
+#' are normally distributed with mean 0 and variance 4. We considered 3
+#' different data-generating scenarios in which we varied the correlation of
+#' \eqn{x_1,x_2} (\code{corx}) in the training and test data sets.
+#' In the second example ("non-linear"), the distribution of
+#' a species is non-linearly related to temperature (\eqn{x_3 \sim N(0,4)}).
 #'
 #' @param nused The number of used locations in training/test data set
 #' @param navail The number of background locations in training/test data set
@@ -14,24 +18,50 @@
 #' @param corx The correlation between elevation and precipitation in
 #' training/test dataset. For missing predictor example only.
 #' @param ntemp A large number of available points.
-#' @param scenario The specific scenario as described in the manuscript.
-#' Options include"corr00", "corrNN", "corrPN", and "T".
 #' @param example The name of the example. Options include "missing predictor"
 #' or "non-linear".
 #'
 #' @return A dataframe of simulated data
 #'
+#' @seealso Full archive of the data and code necessary to replicate the
+#' manuscript at \url{http://doi.org/10.13020/D6T590}.
+#'
 #' @examples
-#' # Simulate data for the non-linear example
-#' new.data <- uhcdatasimulator(nused = 100,
+#' # Simulate training or test data for the non-linear example
+#' nonlinear.data <- uhcdatasimulator(nused = 100,
 #'    navail = 10000,
 #'    betas = c(2,-1),
 #'    ntemp = 1000000,
 #'    scenario = "T",
 #'    example = "non-linear")
+#'
+#' # Simulate training or test data for the missing predictor example
+#'    #   Where corr(x1,x2) = 0
+#' missingpredictor.0.data <- uhcdatasimulator(nused = 100,
+#'    navail = 10000,
+#'    betas = c(0.5,-1),
+#'    corx = 0,
+#'    ntemp = 1000000,
+#'    example = "missing predictor")
+#'
+#'    #   Where corr(x1,x2) = -0.3
+#' missingpredictor.N.data <- uhcdatasimulator(nused = 100,
+#'    navail = 10000,
+#'    betas = c(0.5,-1),
+#'    corx = -0.3,
+#'    ntemp = 1000000,
+#'    example = "missing predictor")
+#'
+#'    #   Where corr(x1,x2) = 0.3
+#' missingpredictor.P.data <- uhcdatasimulator(nused = 100,
+#'    navail = 10000,
+#'    betas = c(0.5,-1),
+#'    corx = 0.3,
+#'    ntemp = 1000000,
+#'    example = "missing predictor")
 uhcdatasimulator <- function(nused, navail,
                              betas, corx, ntemp,
-                             scenario, example){
+                             example){
   ### Missing predictor example
   if (example=="missing predictor"){
     # ntot = total number of locations in data set
