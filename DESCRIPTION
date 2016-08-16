@@ -10,7 +10,9 @@ Description: Create UHC plots as described in Fieberg, Forester, Street,Johnson,
 License: MIT License
 LazyData: TRUE
 RoxygenNote: 5.0.1
-Imports: MASS
+Imports: MASS,
+    KernSmooth,
+    survival
 Suggests: testthat,
     knitr,
     rmarkdown

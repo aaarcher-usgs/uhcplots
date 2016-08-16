@@ -44,7 +44,6 @@ nonlinear.data <- uhcdatasimulator(nused = 100,
    navail = 10000,
    betas = c(2,-1),
    ntemp = 1000000,
-   scenario = "T",
    example = "non-linear")
 
 # Simulate training or test data for the missing predictor example

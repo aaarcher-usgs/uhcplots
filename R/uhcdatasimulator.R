@@ -32,7 +32,6 @@
 #'    navail = 10000,
 #'    betas = c(2,-1),
 #'    ntemp = 1000000,
-#'    scenario = "T",
 #'    example = "non-linear")
 #'
 #' # Simulate training or test data for the missing predictor example
@@ -118,4 +117,3 @@ uhcdatasimulator <- function(nused, navail,
   # Return files
   return(sim.data)
 }
-#' spun with ezspin("uhcplots/functions/uhcdatasimulator.R", out_dir = "uhcplots/output", fig_dir="uhcplots/figures", keep_md=F)
