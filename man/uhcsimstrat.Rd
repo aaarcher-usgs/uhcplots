@@ -55,7 +55,7 @@ design.mat.full <- model.matrix(~decid50 + mixed50 +
   data = mdat.test)
 
 # Create design matrix from test data for Reduced model SSF
-design.mat.red <- model.matrix(~mixed50 + step -1, data = mdat.test)
+design.mat.reduc <- model.matrix(~mixed50 + step -1, data = mdat.test)
 
 # Create design matrix for covariates for z (matrix of used & available
 # environmental characteristics in the test data set.)
@@ -70,7 +70,7 @@ xhat.full <- uhcsimstrat(nsims = 1000,
   z = z)
 
 # Simulate data for Reduced model SSF
-xhat.full <- uhcsimstrat(nsims = 1000,
+xhat.reduc <- uhcsimstrat(nsims = 1000,
   xmat = design.mat.reduc,
   stratum = mdat.test$stratum,
   fit_ssf = ssf.train.reduc,
