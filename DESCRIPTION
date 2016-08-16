@@ -11,4 +11,7 @@ License: MIT License
 LazyData: TRUE
 RoxygenNote: 5.0.1
 Imports: MASS
-Suggests: testthat
+Suggests: testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
