@@ -37,6 +37,7 @@
 #'     ntemp = 1000000,
 #'     example = "non-linear")
 #'
+#' poop
 #' # Simulate test data for the non-linear example
 #' nonlinear.test <- uhcdatasimulator(nused = 100,
 #'     navail = 10000,
