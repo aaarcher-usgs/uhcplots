@@ -99,7 +99,17 @@ train.missingprecip <- glm(y ~ elev,
                            data = traindat)
 ```
 
+**uhcsim function**
 
+Create simulation envelopes for the environmental characteristic (temperature) 
+at the observed locations in the test data using both models (uhcsim function)
+
+```{r uhcsim1}
+# Correct model
+
+# Missing predictor model
+
+```
 
 Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
 
