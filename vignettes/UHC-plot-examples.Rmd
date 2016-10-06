@@ -26,6 +26,7 @@ $x_1$ and $x_2$, or $\rho(x_1,x_2)$, varies for the training and test data sets.
 Example-specific settings
 ```{r example1}
 library(devtools)
+library(KernSmooth)
 load_all()
 set.seed(1000)
 # Number of "used" locations
@@ -106,55 +107,160 @@ at the observed locations in the test data using both models (uhcsim function)
 
 ```{r uhcsim1}
 # Correct model
+xhat.correct <- uhcsim(nsims = 1000, 
+                       nused_test = nused_test,
+                       xmat = testdat[, c("elev","precip")], 
+                       fit_rsf = train.correct, 
+                       z = testdat[, c("elev","precip")])
+
 
 # Missing predictor model
-
+xhat.missingprecip <- uhcsim(nsims = nsims, 
+                             nused_test = nused_test, 
+                             xmat = as.matrix(testdat[, c("elev")]), 
+                             fit_rsf = train.missingprecip, 
+                             z = testdat[, c("elev","precip")])
 ```
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+**uhcdenscalc function**
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+Calculates kernal density estimates to create UHC plots.
 
-## Vignette Info
+```{r uchdenscalc}
+# Correct model
+# uhcdenscalc function for both predictors
+denshats.elev.correct <- uhcdenscalc(rand_sims = xhat.correct[,,1],
+                                  dat = subset(testdat, y==1, select="elev"), 
+                                  avail = subset(testdat, y==0, select="elev")) 
+denshats.precip.correct <- uhcdenscalc(rand_sims = xhat.correct[,,2], 
+                                     dat = subset(testdat, y==1, select="precip"),
+                                     avail = subset(testdat, 
+                                                  y==0, select="precip")) 
 
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
-
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+# Missing predictor model
+# uhcdenscalc function for both predictors
+denshats.elev.missingprecip <- uhcdenscalc(rand_sims = xhat.missingprecip[,,1],
+                                           dat = subset(testdat, 
+                                                      y==1, select="elev"), 
+                                           avail = subset(testdat, 
+                                                        y==0, select="elev")) 
+denshats.precip.missingprecip <- uhcdenscalc(rand_sims = xhat.missingprecip[,,2], 
+                                             dat = subset(testdat, 
+                                                        y==1, select="precip"), 
+                                             avail = subset(testdat, 
+                                                        y==0, select="precip"))
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
+### Create UHC plot (formatted for manuscript)
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
+Uses uhcdensplot function
 
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+```{r plotuhc00, fig.height=4, fig.width=16}
+par(mfrow=c(1,5), mar=c(2,2,2,2), oma=c(3, 0, 5, 0), bty="L")
 
-## More Examples
+# Use the first plot for text
+    plot(1, type="n", xlab="", ylab="", 
+         xlim=c(0, 1), ylim=c(0, 1), 
+         xaxt='n',yaxt='n',bty='n')
+    text(0.01, 0.9, "Training Data", cex=3, adj=0)
+    text(0.2, 0.72, labcor1 , cex=3,adj=0) 
+    text(0.01, 0.52, "Test Data", cex=3, adj=0)
+    text(0.2, 0.40, labcor2 , cex=3, adj=0) 
 
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+# Incorrect model (missing predictor)
+uhcdensplot(densdat = denshats.elev.missingprecip$densdat, 
+                densrand = denshats.elev.missingprecip$densrand,
+                xl = c(-4,9),
+                includeAvail = TRUE,
+                densavail = denshats.elev.missingprecip$densavail) 
+    mtext(outer=F, side=2, line=3, "Density", cex=1.3)
+    mtext(side=3, line=1,  panlabs2[1], cex=1.2, ad=0)
+    mtext(outer=F, side=1, line=4, xlabs[1], cex=1.6)
+    
+    uhcdensplot(densdat = denshats.precip.missingprecip$densdat, 
+            densrand = denshats.precip.missingprecip$densrand,
+            xl=c(-9,6),
+            includeAvail = TRUE, 
+            densavail = denshats.precip.missingprecip$densavail) 
+    mtext(outer=F, side=1, line=4, xlabs[2], cex=1.6)
+    mtext(side=3, line=1, panlabs2[2], cex=1.2, ad=0)
 
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+# Correct model (both predictors)
+uhcdensplot(densdat = denshats.elev.correct$densdat, 
+            densrand = denshats.elev.correct$densrand,
+            xl = c(-5,9),
+            includeAvail = TRUE, 
+            densavail = denshats.elev.correct$densavail)  
+    mtext(side=3, line=1, panlabs2[3], cex=1.2, ad=0)
+    mtext(outer=F, side=1, line=4, xlabs[1], cex=1.6)
+
+uhcdensplot(densdat = denshats.precip.correct$densdat, 
+            densrand = denshats.precip.correct$densrand,
+            xl = c(-9,3.5),
+            includeAvail = TRUE, 
+            densavail = denshats.precip.correct$densavail) 
+    mtext(side=3, line=1, panlabs2[4], cex=1.2, ad=0)
+    mtext(outer=F, side=1, line=4, xlabs[2], cex=1.6)
+
+    if(top==1){
+      mtext(outer=T, side=3.5, line=2, adj=0.80, 
+            expression(y %~% elev+precip), cex=2.5)
+      mtext(outer=T, side=3.5, line=2, adj=0.40, 
+            expression(y %~% elev), cex=2.5)
+      }
+uhc.plot <- recordPlot()
 ```
 
-Also a quote using `>`:
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+#### Optional UHC Plot
+ 
+$f^u(z)-\hat{f}^u(z)_i$
+
+Uses uhcdiffdensplot function 
+
+```{r uhcdiff00, fig.height=4, fig.width=16}
+par(mfrow=c(1,5), mar=c(2,2,2,2), oma=c(3, 0, 5, 0), bty="L")
+
+# Use the first plot for text
+plot(1, type="n", xlab="", ylab="", 
+     xlim=c(0, 1), ylim=c(0, 1), 
+     xaxt='n',yaxt='n',bty='n')
+text(0.01, 0.9, "Training Data", cex=3, adj=0)
+text(0.2, 0.72, labcor1 , cex=3,adj=0) 
+text(0.01, 0.52, "Test Data", cex=3, adj=0)
+text(0.2, 0.40, labcor2 , cex=3, adj=0) 
+
+# Incorrect model (missing predictor)
+uhcdiffdensplot(densdat = denshats.elev.missingprecip$densdat, 
+                densrand = denshats.elev.missingprecip$densrand,
+                xl = c(-5,9))  
+    mtext(outer=F, side=2, line=3, "Density", cex=1.3)
+    mtext(side=3, line=1,  panlabs2[1], cex=1.2, ad=0)
+    mtext(outer=F, side=1, line=4, xlabs[1], cex=1.6)
+
+uhcdiffdensplot(densdat = denshats.precip.missingprecip$densdat, 
+                    densrand = denshats.precip.missingprecip$densrand,
+                    xl=c(-9,3.5)) 
+    mtext(outer=F, side=1, line=4, xlabs[2], cex=1.6)
+    mtext(side=3, line=1, panlabs2[2], cex=1.2, ad=0)
+
+# Correct model (both predictors)
+uhcdiffdensplot(densdat = denshats.elev.correct$densdat, 
+                    densrand = denshats.elev.correct$densrand,
+                    xl = c(-4,9))  
+    mtext(side=3, line=1,  panlabs2[3], cex=1.2, ad=0)
+    mtext(outer=F, side=1, line=4, xlabs[1], cex=1.6)
+
+uhcdiffdensplot(densdat = denshats.precip.correct$densdat, 
+                    densrand = denshats.precip.correct$densrand,
+                    xl = c(-9,6))
+    mtext(side=3, line=1,  panlabs2[4], cex=1.2, ad=0)
+    mtext(outer=F, side=1, line=4, xlabs[2], cex=1.6)
+
+if(top==1){
+  mtext(outer=T, side=3.5, line=2, adj=0.80, 
+        expression(y %~% elev+precip), cex=2.5)
+  mtext(outer=T, side=3.5, line=2, adj=0.40, 
+        expression(y %~% elev), cex=2.5)
+}
+```
