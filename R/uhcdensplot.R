@@ -91,6 +91,7 @@
 #'    includeAvail = TRUE,
 #'    densavail = denshats.misspec$densavail,
 #'    includeLegend = TRUE)
+#' @export
 uhcdensplot <- function(densdat, densrand, includeAvail=F, densavail=NULL, xl=NULL,
                         yl=NULL, includeLegend=T){
   # combine to get reasonable axis limits

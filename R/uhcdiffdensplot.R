@@ -69,6 +69,7 @@
 #' # Create an alternate UHC plot for the linear (misspecified) model
 #' uhcdiffdensplot(densdat = denshats.misspec$densdat,
 #'    densrand = denshats.misspec$densrand)
+#' @export
 uhcdiffdensplot <- function(densdat, densrand, xl=NULL){
 
   mean.f <- apply(densrand,2,mean)

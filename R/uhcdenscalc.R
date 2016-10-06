@@ -71,6 +71,7 @@
 #' denshats.misspec <- uhcdenscalc(rand_sims = xhat.misspec[,,1],
 #'    dat = subset(nonlinear.test, y==1, select="temp"),
 #'    avail = subset(nonlinear.test, y==0, select="temp"))
+#' @export
 uhcdenscalc <- function(rand_sims, dat, avail, gridsize=500){
 
   # Density plot of x for each simulated data set & also for the test data set

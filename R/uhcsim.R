@@ -57,6 +57,7 @@
 #'    xmat = as.matrix(model.matrix(y~temp, data = nonlinear.test)[,2]),
 #'    fit_rsf = train.misspec,
 #'    z = as.matrix(nonlinear.test[,"temp"]))
+#' @export
 uhcsim <- function(nsims, nused_test, xmat, fit_rsf, z){
   # array to store chosen x's for each simulation
   x_sim_choice <- array(NA,dim=c(nsims,nused_test,ncol(z)))

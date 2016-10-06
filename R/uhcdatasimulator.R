@@ -58,6 +58,7 @@
 #'    corx = 0.3,
 #'    ntemp = 1000000,
 #'    example = "missing predictor")
+#' @export
 uhcdatasimulator <- function(nused, navail,
                              betas, corx, ntemp,
                              example){

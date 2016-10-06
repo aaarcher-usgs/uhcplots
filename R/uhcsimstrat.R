@@ -61,6 +61,7 @@
 #'   stratum = mdat.test$stratum,
 #'   fit_ssf = ssf.train.reduc,
 #'   z = z)
+#' @export
 uhcsimstrat <- function(nsims, xmat, stratum, fit_ssf, z){
 
   ustrat <- unique(stratum) # unique strata
