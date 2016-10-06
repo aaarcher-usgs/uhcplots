@@ -11,24 +11,27 @@ vignette: >
 
 # Introduction 
 
-# UHC Approach
+## UHC Approach
 
-# Examples
-
-## Example 1: Missing predictors
+### Example: Missing predictors
 
 In this example, we will assume that the probability of selection is 
-proportional to $\exp(0.5x_1 - x_2)$, where $x_1$ is elevation and $x_2$ is 
+proportional to exp(0.5x1 - x2), where x1 is elevation and x2 is 
 precipitation. For all scenarios, data were generated under the following
-scenario: $\text{var}(x_1) = \text{var}(x_2) = 4$ and the correlation between
-$x_1$ and $x_2$, or $\rho(x_1,x_2)$, varies for the training and test data sets. 
+scenario: var(x1) = var(x2) = 4 and the correlation between
+x1 and x2, or corr(x1,x2), varies for the training and test data sets. 
 
-Example-specific settings
-```{r example1}
+Load libraries and set seed
+```{r libraries, warning=F,message=F}
 library(devtools)
 library(KernSmooth)
-load_all()
+#install_github("aaarchmiller/uhcplots")
+library(uhcplots)
 set.seed(1000)
+```
+
+Example-specific settings
+```{r example1, warning=F,message=F}
 # Number of "used" locations
 nused_train <- nused_test <- 100 
 # Number of "available" or background locations
@@ -45,7 +48,7 @@ betas <- c(0.5, -1)
 xlabs <- c("Elevation","Precipitation")
 ```
 
-### 1a. Scenario where $\rho(x_1,x_2)$ = 0 for both training and test data sets.
+### 1a. Scenario where corr(x1,x2) = 0 for both training and test data sets.
 
 Scenario-specific Settings
 ```{r scenario1}
@@ -58,8 +61,6 @@ textplot <- ""
 panlabs1 <- c("A)","B)")     
 panlabs2 <- c("A)","B)", "C)", "D)")
 top <- 1                           
-outfig1 <- "uhcplots/graphics/Boyce1a.pdf"
-outfig2 <- "uhcplots/graphics/crosssim1a.pdf"
 ```
 
 **Simulate Data**
@@ -86,8 +87,8 @@ testdat <- uhcdatasimulator(nused = nused_test,
 
 **Fit GLM Models**
 
-Now, we fit two models, one with both $x_1$ and $x_2$ (i.e., "correct" model) 
-and one with just $x_1$ (i.e., "missing predictor" model).
+Now, we fit two models, one with both x1 and x2 (i.e., "correct" model) 
+and one with just x1 (i.e., "missing predictor" model).
 
 ```{r glm1a}
 # Correct model
@@ -155,112 +156,117 @@ denshats.precip.missingprecip <- uhcdenscalc(rand_sims = xhat.missingprecip[,,2]
 
 Uses uhcdensplot function
 
-```{r plotuhc00, fig.height=4, fig.width=16}
+```{r plotuhc00, fig.width=7}
 par(mfrow=c(1,5), mar=c(2,2,2,2), oma=c(3, 0, 5, 0), bty="L")
 
 # Use the first plot for text
     plot(1, type="n", xlab="", ylab="", 
          xlim=c(0, 1), ylim=c(0, 1), 
          xaxt='n',yaxt='n',bty='n')
-    text(0.01, 0.9, "Training Data", cex=3, adj=0)
-    text(0.2, 0.72, labcor1 , cex=3,adj=0) 
-    text(0.01, 0.52, "Test Data", cex=3, adj=0)
-    text(0.2, 0.40, labcor2 , cex=3, adj=0) 
+    text(0.01, 0.9, "Training Data", cex=1, adj=0)
+    text(0.2, 0.72, labcor1 , cex=1,adj=0) 
+    text(0.01, 0.52, "Test Data", cex=1, adj=0)
+    text(0.2, 0.40, labcor2 , cex=1, adj=0) 
+    legend(0.01, 0.35, c("Available", "Used", "Predicted"), 
+            lty = c(1, 2, 1), col = c("black", "red", "grey"), 
+            bty = "n", lwd = c(1, 1, 5))
 
 # Incorrect model (missing predictor)
 uhcdensplot(densdat = denshats.elev.missingprecip$densdat, 
                 densrand = denshats.elev.missingprecip$densrand,
                 xl = c(-4,9),
                 includeAvail = TRUE,
-                densavail = denshats.elev.missingprecip$densavail) 
-    mtext(outer=F, side=2, line=3, "Density", cex=1.3)
-    mtext(side=3, line=1,  panlabs2[1], cex=1.2, ad=0)
-    mtext(outer=F, side=1, line=4, xlabs[1], cex=1.6)
+                densavail = denshats.elev.missingprecip$densavail,
+            includeLegend = F) 
+    mtext(outer=F, side=2, line=3, "Density", cex=1)
+    mtext(side=3, line=1,  panlabs2[1], cex=1, ad=0)
+    mtext(outer=F, side=1, line=4, xlabs[1], cex=1.0)
     
     uhcdensplot(densdat = denshats.precip.missingprecip$densdat, 
             densrand = denshats.precip.missingprecip$densrand,
             xl=c(-9,6),
             includeAvail = TRUE, 
-            densavail = denshats.precip.missingprecip$densavail) 
-    mtext(outer=F, side=1, line=4, xlabs[2], cex=1.6)
-    mtext(side=3, line=1, panlabs2[2], cex=1.2, ad=0)
+            densavail = denshats.precip.missingprecip$densavail,
+            includeLegend = F) 
+    mtext(outer=F, side=1, line=4, xlabs[2], cex=1.0)
+    mtext(side=3, line=1, panlabs2[2], cex=1, ad=0)
 
 # Correct model (both predictors)
 uhcdensplot(densdat = denshats.elev.correct$densdat, 
             densrand = denshats.elev.correct$densrand,
             xl = c(-5,9),
             includeAvail = TRUE, 
-            densavail = denshats.elev.correct$densavail)  
-    mtext(side=3, line=1, panlabs2[3], cex=1.2, ad=0)
-    mtext(outer=F, side=1, line=4, xlabs[1], cex=1.6)
+            densavail = denshats.elev.correct$densavail,
+            includeLegend = F)  
+    mtext(side=3, line=1, panlabs2[3], cex=1, ad=0)
+    mtext(outer=F, side=1, line=4, xlabs[1], cex=1.0)
 
 uhcdensplot(densdat = denshats.precip.correct$densdat, 
             densrand = denshats.precip.correct$densrand,
             xl = c(-9,3.5),
             includeAvail = TRUE, 
-            densavail = denshats.precip.correct$densavail) 
-    mtext(side=3, line=1, panlabs2[4], cex=1.2, ad=0)
-    mtext(outer=F, side=1, line=4, xlabs[2], cex=1.6)
+            densavail = denshats.precip.correct$densavail,
+            includeLegend = F) 
+    mtext(side=3, line=1, panlabs2[4], cex=1, ad=0)
+    mtext(outer=F, side=1, line=4, xlabs[2], cex=1.0)
 
     if(top==1){
       mtext(outer=T, side=3.5, line=2, adj=0.80, 
-            expression(y %~% elev+precip), cex=2.5)
+            expression(y %~% elev+precip), cex=1)
       mtext(outer=T, side=3.5, line=2, adj=0.40, 
-            expression(y %~% elev), cex=2.5)
+            expression(y %~% elev), cex=1)
       }
 uhc.plot <- recordPlot()
 ```
 
 
 #### Optional UHC Plot
- 
-$f^u(z)-\hat{f}^u(z)_i$
 
 Uses uhcdiffdensplot function 
 
-```{r uhcdiff00, fig.height=4, fig.width=16}
+```{r uhcdiff00, fig.width=7}
 par(mfrow=c(1,5), mar=c(2,2,2,2), oma=c(3, 0, 5, 0), bty="L")
 
 # Use the first plot for text
 plot(1, type="n", xlab="", ylab="", 
      xlim=c(0, 1), ylim=c(0, 1), 
      xaxt='n',yaxt='n',bty='n')
-text(0.01, 0.9, "Training Data", cex=3, adj=0)
-text(0.2, 0.72, labcor1 , cex=3,adj=0) 
-text(0.01, 0.52, "Test Data", cex=3, adj=0)
-text(0.2, 0.40, labcor2 , cex=3, adj=0) 
+text(0.01, 0.9, "Training Data", cex=1, adj=0)
+text(0.2, 0.72, labcor1 , cex=1,adj=0) 
+text(0.01, 0.52, "Test Data", cex=1, adj=0)
+text(0.2, 0.40, labcor2 , cex=1, adj=0) 
 
 # Incorrect model (missing predictor)
 uhcdiffdensplot(densdat = denshats.elev.missingprecip$densdat, 
                 densrand = denshats.elev.missingprecip$densrand,
                 xl = c(-5,9))  
-    mtext(outer=F, side=2, line=3, "Density", cex=1.3)
-    mtext(side=3, line=1,  panlabs2[1], cex=1.2, ad=0)
-    mtext(outer=F, side=1, line=4, xlabs[1], cex=1.6)
+    mtext(outer=F, side=2, line=3, "Density", cex=1)
+    mtext(side=3, line=1,  panlabs2[1], cex=1, ad=0)
+    mtext(outer=F, side=1, line=4, xlabs[1], cex=1)
 
 uhcdiffdensplot(densdat = denshats.precip.missingprecip$densdat, 
                     densrand = denshats.precip.missingprecip$densrand,
                     xl=c(-9,3.5)) 
-    mtext(outer=F, side=1, line=4, xlabs[2], cex=1.6)
-    mtext(side=3, line=1, panlabs2[2], cex=1.2, ad=0)
+    mtext(outer=F, side=1, line=4, xlabs[2], cex=1)
+    mtext(side=3, line=1, panlabs2[2], cex=1, ad=0)
 
 # Correct model (both predictors)
 uhcdiffdensplot(densdat = denshats.elev.correct$densdat, 
                     densrand = denshats.elev.correct$densrand,
                     xl = c(-4,9))  
-    mtext(side=3, line=1,  panlabs2[3], cex=1.2, ad=0)
-    mtext(outer=F, side=1, line=4, xlabs[1], cex=1.6)
+    mtext(side=3, line=1,  panlabs2[3], cex=1, ad=0)
+    mtext(outer=F, side=1, line=4, xlabs[1], cex=1)
 
 uhcdiffdensplot(densdat = denshats.precip.correct$densdat, 
                     densrand = denshats.precip.correct$densrand,
                     xl = c(-9,6))
-    mtext(side=3, line=1,  panlabs2[4], cex=1.2, ad=0)
-    mtext(outer=F, side=1, line=4, xlabs[2], cex=1.6)
+    mtext(side=3, line=1,  panlabs2[4], cex=1, ad=0)
+    mtext(outer=F, side=1, line=4, xlabs[2], cex=1)
 
 if(top==1){
   mtext(outer=T, side=3.5, line=2, adj=0.80, 
-        expression(y %~% elev+precip), cex=2.5)
+        expression(y %~% elev+precip), cex=1)
   mtext(outer=T, side=3.5, line=2, adj=0.40, 
-        expression(y %~% elev), cex=2.5)
+        expression(y %~% elev), cex=1)
 }
 ```
