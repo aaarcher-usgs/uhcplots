@@ -85,13 +85,13 @@ uhcdenscalc <- function(rand_sims, dat, avail, gridsize=500){
   # to hold density estimates fU^(z) for all nsims datasets
   densrand <- matrix(NA, nsims,gridsize)
   # observed data density, fu(z)
-  densdat <- bkde(dat, range.x=range.x, gridsize=gridsize)
+  densdat <- KernSmooth::bkde(dat, range.x=range.x, gridsize=gridsize)
   for(i in 1:nsims){ # densities for simulated data sets
-    temp <- bkde(rand_sims[i,], range.x=range.x, gridsize=gridsize)
+    temp <- KernSmooth::bkde(rand_sims[i,], range.x=range.x, gridsize=gridsize)
     densrand[i,] <- temp$y #estimated density
   }
   # density of available points
-  densavail <- bkde(avail,range.x=range.x, gridsize=gridsize)
+  densavail <- KernSmooth::bkde(avail,range.x=range.x, gridsize=gridsize)
   out <- list(densdat=densdat, densrand=densrand, densavail=densavail)
   return(out)
 }
