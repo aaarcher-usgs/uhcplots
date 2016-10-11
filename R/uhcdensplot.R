@@ -105,7 +105,7 @@ uhcdensplot <- function(densdat, densrand, includeAvail=F, densavail=NULL, xl=NU
   #lower sim envelope
   low.f <- apply(densrand,2,quantile, prob=0.025, na.rm=TRUE)
   # upper sim envelope
-  up.f <- apply(densrand,2,quantile, prob=0.975, nar.rm=TRUE)
+  up.f <- apply(densrand,2,quantile, prob=0.975, na.rm=TRUE)
   if (is.null(xl)!= TRUE){
     plot(densdat$x, densdat$y, ylim=yl, xlab="",
                                type="n", ylab="Density", xlim=xl)
