@@ -97,7 +97,7 @@ uhcdensplot <- function(densdat, densrand, includeAvail=F, densavail=NULL, xl=NU
   # combine to get reasonable axis limits
   alldens <- c(densrand, densdat$y, densavail$y)
   if (is.null(yl)){
-  yl <- c(min(alldens), max(alldens))
+    yl <- c(min(alldens), max(alldens))
   }
 
   # mean predicted density
