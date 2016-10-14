@@ -6,7 +6,7 @@ Author: John Fieberg, contributions from Althea ArchMiller
 Maintainer: John Fieberg <jfieberg@umn.edu>
 Description: R package to create UHC plots using simulated and empirical data
     as described in Fieberg, Forester, Street, Johnson, ArchMiller, and
-    Matthiopoulos. (In Review). Species distribution models predictive snipers
+    Matthiopoulos. (In Revision). Species distribution models predictive snipers
     or shots in the dark? Ecology Letters.
 License: MIT License
 LazyData: TRUE

@@ -1,3 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
+^uhc_schematic\.png$
+^uhc_temperature\.png$
