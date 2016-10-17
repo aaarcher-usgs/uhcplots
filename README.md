@@ -1,4 +1,7 @@
 # uhcplots
+
+**In Development** *These tools are being developed and have not yet been fully tested.*
+
 Create Used-Habitat Calibration Plots as described in Fieberg et al. (In review for Ecology Letters).
 
 Programmer: John Fieberg | Secondary Programmer: Althea ArchMiller
