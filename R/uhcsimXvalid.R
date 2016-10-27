@@ -13,13 +13,9 @@
 #' @param nused The number of used locations in the data set.
 #' @param navail The number of available locations in the data set (ie not used)
 #' @param ncovariates The number of covariates or p in the model
-#' @param model_form The model in the form: "y~x1+x2+...+xp" (including
-#' quotations)
-#' @param z_colnames The column names of the environmental characteristics to be
-#' plotted with \code{uhcdensplot}. Takes the form: c("x1","x2",...,"xp")
-#' @param xmat_colnames The column names of the environmental characteristics
-#' that were used as predictors in the model_form. Takes the form:
-#' c("x1","x2",...,"xp")
+#' @param model_form The model in the form: "y~x1+x2+...+xp" (including quotations)
+#' @param z_colnames The column names of the environmental characteristics to be plotted with \code{uhcdensplot}. Takes the form: c("x1","x2",...,"xp")
+#' @param xmat_colnames The column names of the environmental characteristics that were used as predictors in the model_form. Takes the form: c("x1","x2",...,"xp")
 #'
 #' @return An array of dimensions nsims x nused_test x p.
 #'
