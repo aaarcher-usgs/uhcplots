@@ -20,11 +20,10 @@ uhcsimXvalid(data_sim, k_folds, nsims, nused, navail, ncovariates, model_form,
 
 \item{ncovariates}{The number of covariates or p in the model}
 
-\item{model_form}{The model in the form: "y~x1+x2+...+xp" (including
-quotations)}
+\item{model_form}{The model in the form: "y~x1+x2+...+xp" (including quotations)}
 
-\item{z_colnames}{The column names of the environmental characteristics to be
-plotted with \code{uhcdensplot}. Takes the form: c("x1","x2",...,"xp")}
+\item{z_colnames}{The column names of the environmental characteristics to
+be plotted with \code{uhcdensplot}. Takes the form: c("x1","x2",...,"xp")}
 
 \item{xmat_colnames}{The column names of the environmental characteristics
 that were used as predictors in the model_form. Takes the form:
