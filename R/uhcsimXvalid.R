@@ -62,8 +62,9 @@ uhcsimXvalid <- function(data_sim,
     beta_hats <- MASS::mvrnorm(nsims,coef(glm_fit)[-1], vcov(glm_fit)[2:p,2:p])
     ntot_test <- nrow(xmat) # total number of test observations
 
-    records <- 1:10
-    records <- as.integer(records+(10*(kk-1)))
+    nused_per_bin <- nused/k_folds
+    records <- 1:nused_per_bin
+    records <- as.integer(records+(nused_per_bin*(kk-1)))
     for(mm in 1:nsims){
       # c) Calculate probability of selection based on $\beta^i$
       wx_pred <- exp(as.matrix(xmat)%*%beta_hats[mm,])
