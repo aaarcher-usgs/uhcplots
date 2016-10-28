@@ -2,8 +2,10 @@ Package: uhcplots
 Type: Package
 Title: Used-Habitat Calibration plots (UHC plots)
 Version: 0.1.0
-Author: John Fieberg, contributions from Althea ArchMiller
-Maintainer: John Fieberg <jfieberg@umn.edu>
+Authors@R: c(
+    person("John", "Fieberg", email="jfieberg@umn.edu",role=c("aut","cre")),
+    person("Althea", "ArchMiller", email="althea.archmiller@gmail.com",
+    role=c("aut")))
 Description: R package to create UHC plots using simulated and empirical data
     as described in Fieberg, Forester, Street, Johnson, ArchMiller, and
     Matthiopoulos. (In Revision). Species distribution models predictive snipers
@@ -11,11 +13,13 @@ Description: R package to create UHC plots using simulated and empirical data
 License: MIT License
 LazyData: TRUE
 RoxygenNote: 5.0.1
-Imports: MASS,
+Imports:
+    MASS,
     KernSmooth,
     survival,
     dplyr
-Suggests: testthat,
+Suggests:
+    testthat,
     knitr,
     rmarkdown
 VignetteBuilder: knitr
