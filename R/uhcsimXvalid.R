@@ -82,17 +82,25 @@
 #'                                      avail = avail[,"precip"],
 #'                                      gridsize = 500)
 #' # **Step 4** Create UHC plots for each covariate
-#' par(mfrow=c(1,2))
-#'uhcdensplot(densdat = denscalc_elev_missingP$densdat,
+#' opar<-par()
+#' layout(matrix(c(1,2,3,3), ncol=2, byrow=TRUE), heights=c(4,1))
+#' par(mai=rep(0.5, 4))
+#' uhcdensplot(densdat = denscalc_elev_missingP$densdat,
 #'            densrand = denscalc_elev_missingP$densrand,
 #'            includeAvail = T,
-#'            densavail = denscalc_elev_missingP$densavail)
-
-#'uhcdensplot(densdat = denscalc_prec_missingP$densdat,
+#'            densavail = denscalc_elev_missingP$densavail,includeLegend = F)
+#' mtext(outer=F, side=1, line = 3, "Elevation")
+#'
+#' uhcdensplot(densdat = denscalc_prec_missingP$densdat,
 #'            densrand = denscalc_prec_missingP$densrand,
 #'            includeAvail = T,
 #'            densavail = denscalc_prec_missingP$densavail,
 #'            includeLegend = F)
+#' mtext(outer=F, side=1, line= 3, "Precipitation")
+#' par(mai=c(0,0,0,0))
+#' plot.new()
+#' legend("center",c("Available", "Used", "Predicted"), lty = c(1,2,1), col = c("black", "red", "grey"), bty = "n", lwd = c(1,1,5))
+#' par<-opar
 #'
 #' @export
 uhcsimXvalid <- function(data_sim,
