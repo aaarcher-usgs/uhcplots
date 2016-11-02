@@ -11,8 +11,8 @@ uhcdensplot(densdat, densrand, includeAvail = F, densavail = NULL,
 \item{densdat}{The kernel density estimates of observed points in the test
 data set}
 
-\item{densrand}{The predicted kernel density estimates of simulated data
-points}
+\item{densrand}{he kernel density estimates for the habitat covariate at the
+predicted test data points (across M predicted data sets)}
 
 \item{includeAvail}{An indicator determining whether the distribution of
 the available locations should be drawn on the plot}

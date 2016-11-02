@@ -21,7 +21,7 @@ can be applied across a spectrum of species distribution models (SDMs)
 
 
 Fieberg, Forester, Street, Johnson, ArchMiller, and Matthiopoulos.
-In Revision. Species distribution models: predictive snipers or shots in the
+In Review. Species distribution models: predictive snipers or shots in the
 dark? Ecology Letters.
 
 Full code to reproduce the paper at: <http://doi.org/10.13020/D6T590>

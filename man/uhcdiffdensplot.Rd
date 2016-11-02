@@ -10,8 +10,8 @@ uhcdiffdensplot(densdat, densrand, xl = NULL)
 \item{densdat}{The kernel density estimates of observed points in the test
 data set}
 
-\item{densrand}{The predicted kernel density estimates of simulated data
-points}
+\item{densrand}{he kernel density estimates for the habitat covariate at the
+predicted test data points (across M predicted data sets)}
 
 \item{xl}{The x-axis limits (can be user supplied)}
 }
