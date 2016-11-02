@@ -42,7 +42,7 @@ returns an array of dimension nsims x nused_test x p (where p
 is the number of predictors to be validated)
 }
 \examples{
-#' Simulate data using uhcplots::uhcdatasimulator
+# Simulate data using uhcplots::uhcdatasimulator
 data_sim <- uhcdatasimulator(nused = 100,
                             navail = 10000,
                             betas = c(0.5, -1) ,
@@ -50,33 +50,34 @@ data_sim <- uhcdatasimulator(nused = 100,
                             ntemp = 100000,
                             example = "missing predictor")
 
-Set up parameters
+#Set up parameters
 
 # Number of used and available locations in dataset
 used <- data_sim[data_sim$y==1,];  nused <- nrow(used)
 avail <- data_sim[data_sim$y==0,]; navail <- nrow(avail)
+
 ## k-fold cross validation
 
-**Step 1** Partition data into k-fold bins
+#**Step 1** Partition data into k-fold bins
 k_folds <- 10
 nused_k <- nused/k_folds
 navail_k <- navail/k_folds
 data_sim$k <- dismo::kfold(data_sim, k = k_folds, by = data_sim$y)
 table(data_sim$k)
 
-**Step 2** Fit a model (in this case, missing precipitation)
-#'
-Set up some parameters
+#**Step 2** Fit a model (in this case, missing precipitation)
+
+# Set up some parameters
 nsims <- 1000 # M from paper;
 ncovariates <- 2;
 model_form_missingP <- "y~elev"
 z_colnames <- c("elev","precip")
 xmat_colnames_missingP <- c("elev")
 
-Create an array to store chosen location covariates for each simulation
-and each k-fold "test" data bin
-x_sim_choice_missingP <- array(NA, dim = c(nsims, nused, ncovariates_missingP))
-Get predicted distribution of covariates for each fold, k:
+# Create an array to store chosen location covariates for each simulation
+# and each k-fold "test" data bin
+x_sim_choice_missingP <- array(NA, dim = c(nsims, nused, ncovariates))
+# Get predicted distribution of covariates for each fold, k:
 x_sims_choice_missingP <- uhcplots::uhcsimXvalid(data_sim = data_sim,
                                                 k_folds = k_folds,
                                                 nsims = nsims,
@@ -86,7 +87,7 @@ x_sims_choice_missingP <- uhcplots::uhcsimXvalid(data_sim = data_sim,
                                                 model_form = model_form_missingP,
                                                 z_colnames = z_colnames,
                                                 xmat_colnames = xmat_colnames_missingP)
-**Step 3** Density calculations
+# **Step 3** Density calculations
 denscalc_elev_missingP <- uhcdenscalc(rand_sims = x_sims_choice_missingP[,,1],
                                      dat = used[,"elev"],
                                      avail = avail[,"elev"],
@@ -95,7 +96,7 @@ denscalc_prec_missingP <- uhcdenscalc(rand_sims = x_sims_choice_missingP[,,2],
                                      dat = used[,"precip"],
                                      avail = avail[,"precip"],
                                      gridsize = 500)
-**Step 4** Create UHC plots for each covariate
+# **Step 4** Create UHC plots for each covariate
 par(mfrow=c(1,2))
 uhcdensplot(densdat = denscalc_elev_missingP$densdat,
            densrand = denscalc_elev_missingP$densrand,
