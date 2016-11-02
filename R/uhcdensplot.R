@@ -10,8 +10,8 @@
 #'
 #' @param densdat The kernel density estimates of observed points in the test
 #' data set
-#' @param densrand The predicted kernel density estimates of simulated data
-#' points
+#' @param densrand he kernel density estimates for the habitat covariate at the
+#'  predicted test data points (across M predicted data sets)
 #' @param includeAvail An indicator determining whether the distribution of
 #' the available locations should be drawn on the plot
 #' @param densavail The kernel density estimates of available points in the

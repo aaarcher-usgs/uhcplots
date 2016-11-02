@@ -1,5 +1,5 @@
 ---
-title: "Used-Habitat Calibration Plot Examples"
+title: "Introduction to the Used-Habitat Calibration Plots (uhcplots) Package"
 author: "Althea ArchMiller and John Fieberg"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -9,19 +9,64 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-# Introduction 
 
-## UHC Approach
+This package contains functions that allow the user to: 
 
-### Example: Missing predictors
+-  recreate the simulation examples in Fieberg, Forester, Street, Johnson,
+ArchMiller, and Matthiopoulos. In Review. Species distribution models: predictive 
+snipers or shots in the  dark? Ecology Letters.
+ 
+- create Used-Habitat Calibration (UHC) plots via cross-validation
 
-In this example, we will assume that the probability of selection is 
-proportional to exp(0.5x1 - x2), where x1 is elevation and x2 is 
-precipitation. For all scenarios, data were generated under the following
-scenario: var(x1) = var(x2) = 4 and the correlation between
-x1 and x2, or corr(x1,x2), varies for the training and test data sets. 
+We begin by providing a short overview of the steps involved in creating UHC plots.  We then illustrate the functions in the *uhcplots* pacakge via three examples: 
 
-Load libraries and set seed
+1. UHC plots to explore the impact of a missing predictor using data splitting (simulation example from Fieberg et al. in review).
+2. UHC plots to explore the impact of a missing predictor using spatially-stratified cross-validation
+3. UHC plots for validating step-selection functions fit to moose location data
+
+
+## How to calculate UHC plots
+
+UHC plots are simple graphical tools that can be used to validate species distribution, 
+habitat selection, and step-selection models. UCH plots compare distributions
+of habitat covariates at the used (or presence) points to distributions predicted
+based on a model fit to independent (training) data.  
+
+To create a UHC plot, we:
+
+1. Split the data into training and test data sets.  This may be accomplished by
+data splitting - either randomly or using temporal or spatial stratification (e.g.,
+the model may be fit to a subset of sites or years, with other 
+sites or years used as "out-of-sample" data).  Alternatively, one can use bootstrapping
+or cross-validation to evaluate out-of-sample predictions.  We provide an example
+using spatially-stratified cross-validation later on in this vignette.
+
+2. Summarize the distribution of habitat covariates at the used (i.e., presence) points in the test data set, $f^u(z)$. In our examples, we use a kernel density estimator to represent $f^u(z)$.  Similarly, summarize the distribution of the habitat covariates at the available (i.e., background)  points in the test data set, $f^a(z)$.  Differences between these two densities signal that the covariate will be an important predictor of the species distribution. 
+
+3. Fit a model to the training data set.  Store $\hat{\beta}$ and $\widehat{\mathrm{cov}}(\hat{\beta})$ to characterize the uncertainty in the parameters (ignoring the intercept if using logistic regression). Assuming we have a large enough sample for $\hat{\beta}$ to be approximately normally distributed, we can draw samples from a multivariate normal distribution, $\mathrm{MVN}(\hat{\beta}, \widehat{\mathrm{cov}}(\hat{\beta})$), to account for uncertainty in the estimated parameters.  This uncertainty may alternatively be captured using a non-parametric bootstrap or via samples from a posterior distribution (if implementing the model in a Bayesian framework). We will refer to the distribution capturing uncertainty in $\hat{\beta}$ as the *joint parameter distribution* to recognize that this will be a multivariate distribution if more than one covariate is included in the model.
+
+4. Do the following $M$ times (with loop index $i$):
+
+    a. To account for parameter uncertainty, select new vector of parameter values randomly from their joint parameter distribution, $\beta^i$.
+    b. Estimate the relative probability of selection for the test data: $w(x^{test}\beta^i)= \exp(x^{test}\beta^{i})$. 
+    c. Select a simple random sample of $n^{test}_u$ observations from the combined (presence and background) test data, with probabilities of selection proportional to $w(x^{test}\beta^i)$ from step [3b]; here $n^{test}_u$ is the number of used points in the test data set. 
+    d. Summarize the distribution of habitat covariates associated with the points chosen in step [3c], $\hat{f}^u(z)_i$ . 
+
+5. Compare the observed distribution of covariate values at the presence points, $f^u(z)$ from step [1], to the predicted distribution of these characteristics, $\hat{f}^u(z)_i$  from step [3], across the $M$ simulations. We illustrate two plotting options:  
+
+    a. Option 1:  overlay $f^u(z)$ (from step [1]) on a 95\% simulation envelope constructed using the $\hat{f}^u(z)_i$. 
+    b. Option 2: plot the 2.5$^{th}$ and 97.5$^{th}$ quantiles of $f^u(z)-\hat{f}^u(z)_i$.    
+
+
+## Example 1: UHC plots to explore the impact of a missing predictor using data splitting
+
+This simulation example comes from Fieberg et al. (in review). In this example, we will assume that the probability of selection is 
+proportional to $\exp(0.5x_1 - x_2)$, where $x_1$ is elevation and $x_2$ is 
+precipitation. We begin by loading 2 packages:
+ 
+- KernSmooth (for creating smooth density estimates of habitat covariates)
+- uchplots (for creating UHC plots!)
+
 ```{r libraries, warning=F,message=F}
 library(devtools)
 library(KernSmooth)
@@ -30,7 +75,17 @@ library(uhcplots)
 set.seed(1000)
 ```
 
-Example-specific settings
+
+We will simulate used and available pionts using the *uhcdatasimulator* function in the *uhcplots* package.  This function was created to allow users to rerun the examples from Fieberg et al. (in review), but with the possibility of modifying:
+
+- numbers of used and available locations in training and test data sets
+- the magnitude of the regression coefficients determining the relative probability of selection as a function of elevation and precipitation (example = "missing predictor") or as a function of temperature and temperature$^2$ ( example = "non-linear")
+- the correlation among elevation and precipitation in the test and training data sets (if running example = "missing predictor")
+
+Below, we replicate the example illustrating UCH plots in the presence of a missing predictor (precipitation) for the scenario where the correlation between elevation and precipitation was = 0.3 in the training data and -0.3 in the test data.
+
+Example-specific settings:
+
 ```{r example1, warning=F,message=F}
 # Number of "used" locations
 nused_train <- nused_test <- 100 
@@ -48,18 +103,19 @@ betas <- c(0.5, -1)
 xlabs <- c("Elevation","Precipitation")
 ```
 
-### 1a. Scenario where corr(x1,x2) = 0 for both training and test data sets.
-
-Scenario-specific Settings
+Scenario-specific settings:
 ```{r scenario1}
-corx.train <- 0                      
-corx.test <- 0                       
-scenario <- "corr00"                 
-labcor1 <- expression(rho[list(x[1],x[2])]==0)
-labcor2 <- expression(rho[list(x[1],x[2])]==0) 
-textplot <- ""                       
+# correlation (elevation, precipitation) in training and test data
+corx.train <- 0.3                    
+corx.test <- -0.3                    
+# Plot labels (for the correlations, above)
+labcor1 <- expression(rho[list(x[1],x[2])]==0.3)
+labcor2 <- expression(rho[list(x[1],x[2])]==-0.3) 
+textplot <- ""                    
+# panel lables
 panlabs1 <- c("A)","B)")     
 panlabs2 <- c("A)","B)", "C)", "D)")
+# Add a title to the top if top <-1
 top <- 1                           
 ```
 
@@ -85,7 +141,7 @@ testdat <- uhcdatasimulator(nused = nused_test,
                              example = example)
 ```
 
-**Fit GLM Models**
+**Fit GLM Models to Training Data**
 
 Now, we fit two models, one with both x1 and x2 (i.e., "correct" model) 
 and one with just x1 (i.e., "missing predictor" model).
@@ -101,11 +157,18 @@ train.missingprecip <- glm(y ~ elev,
                            data = traindat)
 ```
 
-**uhcsim function**
+**Create Predicted Distributions Using the *uhcsim* Function**
 
-Create simulation envelopes for the environmental characteristic (temperature) 
-at the observed locations in the test data using both models (uhcsim function)
+Next, we create simulation envelopes for the environmental characteristics (elevation and precipitation) 
+at the observed locations in the test data using both models. As in the paper, we create 1000 predicted distributions (i.e., we set M = 1000 in step 4 of the process). Note, the *uhcim* function requires the following arguments:
 
+- nsims = number of predicted distributions to create (this is analogous to "M" in step 4)
+- nused_test = number of used points to select in the test data set
+- xmat = design matrix for the fitted species distribution model
+- fit_rsf = fitted logistic regression model 
+- z = matrix of habitat covariates to cross-validate.
+
+This function returns a (nsims, $n^{u}_{test}$, number of covariates = ncol(z)) array containing the habitat covariates associated with each of $n^{u}_{test}$ randomly selected locations  across all M simulations.  
 ```{r uhcsim1}
 # Correct model
 xhat.correct <- uhcsim(nsims = 1000, 
@@ -123,9 +186,19 @@ xhat.missingprecip <- uhcsim(nsims = nsims,
                              z = testdat[, c("elev","precip")])
 ```
 
-**uhcdenscalc function**
+**Summarize the Predicted Distributions Using the *uhcdenscalc* Function**
 
-Calculates kernal density estimates to create UHC plots.
+Next, we calculate a kernel density estimate of the predicted distribution of both predictors for each of the M data sets, $\hat{f}^u(x_1)_i$ and $\hat{f}^u(x_2)_i$ ($i = 1, ..., M$). The *uhcdenscalc* function requires the following arguements:
+
+- rand_sims = an (nsims, $n^{u}_{test}$, number of covariates) array containing the habitat covariates associated with each of $n^{u}_{test}$ randomly selected locations  across M separate simulations.  Usually, this array will be generated by the *uhcsim* or *uhcsimstrat* function.
+- dat = the characteristics associated with observed locations in the test data set
+- avail = the characteristics associated with available locations in the test data set
+
+The *uhcdenscalc* function will return a list of density estimates associated with:
+
+- all M sets of predicted locations (object\$densrand);
+- the observed locations (object\$densdat); and
+- the available locations (object\$densavail)
 
 ```{r uchdenscalc}
 # Correct model
@@ -154,7 +227,13 @@ denshats.precip.missingprecip <- uhcdenscalc(rand_sims = xhat.missingprecip[,,2]
 
 ### Create UHC plot (formatted for manuscript)
 
-Uses uhcdensplot function
+Lastly, we use the *uhcdensplot* function to produce the UHC plot (as illustrated in Fieberg et al. in review). This function requires as input:
+
+- densdat = the kernel density estimates of observed points in the test data set
+- densrand = the kernel density estimates for the habitat covariate at the predicted test data points (across M predicted data sets)
+- includeAvail = an indicator determining whether the distribution of the available locations should be drawn on the plot
+-  densavail = the kernel density estimates of available points in the test data set (needed if includeAvail = TRUE)
+
 
 ```{r plotuhc00, fig.width=7}
 par(mfrow=c(1,5), mar=c(2,2,2,2), oma=c(3, 0, 5, 0), bty="L")
@@ -216,13 +295,12 @@ uhcdensplot(densdat = denshats.precip.correct$densdat,
       mtext(outer=T, side=3.5, line=2, adj=0.40, 
             expression(y %~% elev), cex=1)
       }
-uhc.plot <- recordPlot()
 ```
 
 
-#### Optional UHC Plot
+### Alternative UHC Plot
 
-Uses uhcdiffdensplot function 
+We also illustrate an alternative plot, depicting the 2.5$^{th}$ and 97.5$^{th}$ quantiles of $f^u(z)-\hat{f}^u(z)_i$, using the *uhcdiffdensplot* function 
 
 ```{r uhcdiff00, fig.width=7}
 par(mfrow=c(1,5), mar=c(2,2,2,2), oma=c(3, 0, 5, 0), bty="L")
@@ -270,3 +348,293 @@ if(top==1){
         expression(y %~% elev), cex=1)
 }
 ```
+
+## Spatially-Stratified Cross validation
+
+For this example, we will again simulate data where the species distribution is driven by elevation ($x_1$) and precipitation ($x_2$) with the probability of selecting locations proportional to $\exp(0.5x_{1} - x_{2})$. We will first generate used and available points, then associate random ($x$, $y$) spatial coordinates to these points
+ 
+```{r echo=FALSE}
+rm("simdat_train")
+```
+
+```{r}
+# ### Specify Parameters
+
+# Global settings
+nused<- 100
+navail <- 10000
+ntemp <- 1000000
+nsims <- 1000 # M from paper
+
+# Example-specific settings
+example <- "missing predictor"       
+set.seed(1000)           
+betas <- c(0.5, -1)  
+xlabs <- c("Easting", "Northing")
+corx <--0.3                
+```
+
+Simulate data using the *uhcdatasimulator* function.  This time, we will only simulate one dataset and use cross-validation to explore model transferability.
+
+```{r}
+simdat <- uhcdatasimulator(nused = nused,     
+                             navail = navail,   
+                             betas = betas,
+                             corx = corx,       
+                             ntemp = ntemp,
+                             example = example)
+
+```
+
+Next, we generate x and y coordinates from uniform distributions and associated these coordinates with the used and available points.
+
+```{r}
+# Add in spatial coordinates, correlated with elev and precip
+xcoord <- runif(nrow(simdat),0,1)
+ycoord <- runif(nrow(simdat),0,1)
+
+xo<-order(simdat$elev*4+simdat$precip)
+simdat<-simdat[xo,]
+xo<-order(xcoord+rnorm(nrow(simdat), 0, 0.3))
+simdat$xcoord<-xcoord[xo]
+
+xo<-order(4*simdat$precip+simdat$elev)
+simdat<-simdat[xo,]
+xo<-order(ycoord+rnorm(nrow(simdat), 0, 0.3))
+simdat$ycoord<-ycoord[xo]
+```
+
+OK. Lets look at the correlations among our predictors and also their correlations with the ($x$, $y$) spatial coordinates.  This will require the GGally library.
+
+```{r galley, fig.height= 6, fig.width=6, message=FALSE, warning=FALSE}
+library(GGally)
+ggscatmat(simdat, columns = c("xcoord", "ycoord", "elev", "precip"))
+```
+
+Lets look at the data spatially.
+
+```{r spatplot, fig.height= 4, fig.width=12, message=FALSE, warning=FALSE}
+bg<-"black" #background color of used points
+rc<-"yellow" #ring color of used points
+pch.u<-24 #pch for used points
+par(oma=c(0,0,3,0), mar=c(5.1, 5.1, 4.1, 2.1),cex.lab=2, cex.main=2.4)
+layout(matrix(c(1,1,2,2,3), nrow=1))
+# Create a function to generate a continuous color palette
+rbPal <- colorRampPalette(c(rgb(1,0,0,0.5),rgb(0,0,1,0.5)),alpha=T)
+
+#Plot tra
+simdat$Col <- rbPal(10)[as.numeric(cut(simdat$elev,breaks = 10))]
+with(simdat[simdat$y==0,], 
+     plot(xcoord, ycoord,
+     col=simdat$Col, pch=20, cex=1,main="Elevation",
+     ylab=expression(paste(italic(y), "-coordinate")),
+     xlab=expression(paste(italic(x), "-coordinate"))))
+with(simdat[simdat$y==1,], 
+     points(xcoord, ycoord,
+           pch=pch.u, cex=1.8, col=rc, bg=bg))
+
+simdat$Col <- rbPal(10)[as.numeric(cut(simdat$precip,breaks = 10))]
+with(simdat[simdat$y==0,], 
+     plot(xcoord, ycoord,
+          col=simdat$Col, pch=20, cex=1,main="Precipitation",
+          ylab=expression(paste(italic(y), "-coordinate")),
+          xlab=expression(paste(italic(x), "-coordinate"))))
+with(simdat[simdat$y==1,], 
+     points(xcoord, ycoord,
+            pch=pch.u, cex=1.8, col=rc, bg=bg))
+rbPal <- colorRampPalette(c('red','blue'))
+
+plot(0:1, 0:1, type="n", bty="n", xaxt="n", yaxt="n", xlab="", ylab="")
+SDMTools::legend.gradient(cbind(x=c(0,.2,.20,0),y=c(1,1,0,0)),
+                          cols = colorRampPalette(c(rgb(1,0,0,0.5),
+                                                    rgb(0,0,1,0.5)),
+                                                  alpha=T)(10),
+                          title = "", limits=c("",""))
+text(0.25, 0.95, "High", cex=2, adj=0)
+text(0.25, 0.05, "Low", cex=2, adj=0)
+```
+
+### Spatially-stratified cross-validation
+
+To produce a UHC plot using cross-validation, we:
+
+1. Split our data into k folds (separate data sets).
+2. Loop from i = 1:k
+
+    a. Fit the data to all data EXCEPT the ith fold
+    b. Store $\hat{\beta}$ and $\widehat{\mathrm{cov}}(\hat{\beta})$ to characterize the uncertainty in the parameters (ignoring the intercept if using logistic regression).
+    c. Form M predicted distributions for the covariates in the ith fold.
+
+3. Combine all the predictions and then produce UHC plots as in the other examples using data splitting.
+
+Essentially, for each step in the process, we treat the $i^th$ fold as "test data" and the rest of the data as "training data".  Below, we illustrate this process using spatially-stratified folds.
+
+First, we will use the get.block function in the ENMeval package to produce spatially stratifed folds for cross-validation.
+
+```{r message=FALSE, warning=FALSE}
+library(ENMeval)
+
+# Settings for using uchsimXvalid.R
+ncovariates <- 4   
+model_form_correct <- "y~elev+precip"
+model_form_missingP <- "y~elev"
+z_colnames <- c("elev","precip","xcoord","ycoord")
+xmat_colnames_correct <- c("elev","precip")
+xmat_colnames_missingP <- c("elev")
+
+# First, separate "used" from "background" into separate data frames
+used_dat <- simdat[simdat$y==1,]
+avail_dat <- simdat[simdat$y==0,]
+
+#' Then, use "block" method to separate based on location of used data points
+temp_bins <- ENMeval::get.block(occ = used_dat[,c("xcoord","ycoord")],
+                          bg.coords = avail_dat[,c("xcoord","ycoord")])
+
+# Finally, associate the bins with the original data
+used_dat$kbin <- temp_bins$occ.grp
+avail_dat$kbin <- temp_bins$bg.grp
+simdat <- rbind(used_dat,avail_dat)
+table(simdat$kbin)
+```
+
+Next, we make use of the *uhcsimXvalid* function to create our predicted distribution.  Note: tthis function takes the place of the *uhcsim* function and requires the following arguments:
+
+- data_sim = the data set to be used in cross-validation
+-  k_folds the number of bins to split data into
+-  nsims = the number of simulations (M) used to create the UHC plot.
+- nused = the number of used locations in the data set.
+- navail = the number of available locations in the data set (ie not used)
+-  ncovariates = the number of covariates or p in the model
+- model_form = the model in the form: "y~x1+x2+...+xp" (including quotations)
+- z_colnames = the column names of the environmental characteristics to be plotted with \code{uhcdensplot}. Takes the form: c("x1","x2",...,"xp")
+- xmat\_colnames = the column names of the environmental characteristics  that were used as predictors in the model\_form. Takes the form: c("x1","x2",...,"xp")
+
+
+```{r}
+uhcsim_correct <- uhcplots::uhcsimXvalid(data_sim = simdat,
+                                  k_folds = 4,
+                                  nsims = nsims,
+                                  nused = nused,
+                                  navail = navail,
+                                  ncovariates = 4,
+                                  model_form = model_form_correct,
+                                  z_colnames = z_colnames,
+                                  xmat_colnames = xmat_colnames_correct)
+
+# uhcdenscalc function for all variables
+dens_elev_correct <- uhcdenscalc(rand_sims = uhcsim_correct[,,1],
+                                dat = subset(simdat, 
+                                             y==1, select="elev"), 
+                                avail = subset(simdat, 
+                                               y==0, select="elev")) 
+dens_prec_correct <- uhcdenscalc(rand_sims = uhcsim_correct[,,2],
+                                dat = subset(simdat, 
+                                             y==1, select="precip"), 
+                                avail = subset(simdat, 
+                                               y==0, select="precip")) 
+dens_xcoor_correct <- uhcdenscalc(rand_sims = uhcsim_correct[,,3],
+                                dat = subset(simdat, 
+                                             y==1, select="xcoord"), 
+                                avail = subset(simdat, 
+                                               y==0, select="xcoord")) 
+dens_ycoor_correct <- uhcdenscalc(rand_sims = uhcsim_correct[,,4],
+                                 dat = subset(simdat, 
+                                              y==1, select="ycoord"), 
+                                 avail = subset(simdat, 
+                                                y==0, select="ycoord")) 
+
+```
+
+Now, we produce our UHCplots as before using *uhcdensplot*.
+
+```{r uhccorrectil, fig.width=12, fig.heigh=6}
+par(mfrow=c(1,4))
+uhcdensplot(densdat = dens_elev_correct$densdat,
+            densrand = dens_elev_correct$densrand,
+            densavail = dens_elev_correct$densavail,
+            includeAvail = T,
+            includeLegend = F)
+uhcdensplot(densdat = dens_prec_correct$densdat,
+            densrand = dens_prec_correct$densrand,
+            densavail = dens_prec_correct$densavail,
+            includeAvail = T,
+            includeLegend = F)
+uhcdensplot(densdat = dens_xcoor_correct$densdat,
+            densrand = dens_xcoor_correct$densrand,
+            densavail = dens_xcoor_correct$densavail,
+            includeAvail = T,
+            includeLegend = F)
+uhcdensplot(densdat = dens_ycoor_correct$densdat,
+            densrand = dens_ycoor_correct$densrand,
+            densavail = dens_ycoor_correct$densavail,
+            includeAvail = T,
+            includeLegend = F)
+```
+
+
+Lets repreat now for a model witout precipitation. 
+
+```{r}
+uhcsim_noprec <- uhcplots::uhcsimXvalid(data_sim = simdat,
+                                        k_folds = 4,
+                                        nsims = nsims,
+                                        nused = nused,
+                                        navail = navail,
+                                        ncovariates = 4,
+                                        model_form = model_form_missingP,
+                                        z_colnames = z_colnames,
+                                        xmat_colnames = xmat_colnames_missingP)
+
+# uhcdenscalc function for all variables
+dens_elev_noprec <- uhcdenscalc(rand_sims = uhcsim_noprec[,,1],
+                                dat = subset(simdat, 
+                                             y==1, select="elev"), 
+                                avail = subset(simdat, 
+                                               y==0, select="elev")) 
+dens_prec_noprec <- uhcdenscalc(rand_sims = uhcsim_noprec[,,2],
+                                dat = subset(simdat, 
+                                             y==1, select="precip"), 
+                                avail = subset(simdat, 
+                                               y==0, select="precip")) 
+dens_xcoor_noprec <- uhcdenscalc(rand_sims = uhcsim_noprec[,,3],
+                                 dat = subset(simdat, 
+                                              y==1, select="xcoord"), 
+                                 avail = subset(simdat, 
+                                                y==0, select="xcoord")) 
+dens_ycoor_noprec <- uhcdenscalc(rand_sims = uhcsim_noprec[,,4],
+                                 dat = subset(simdat, 
+                                              y==1, select="ycoord"), 
+                                 avail = subset(simdat, 
+                                                y==0, select="ycoord")) 
+```
+
+And, finally, our UHC plot!
+
+```{r uhcNoprecip, fig.width=12, fig.heigh=6}
+par(mfrow=c(1,4))
+uhcdensplot(densdat = dens_elev_noprec$densdat,
+            densrand = dens_elev_noprec$densrand,
+            densavail = dens_elev_noprec$densavail,
+            includeAvail = T,
+            includeLegend = F)
+uhcdensplot(densdat = dens_prec_noprec$densdat,
+            densrand = dens_prec_noprec$densrand,
+            densavail = dens_prec_noprec$densavail,
+            includeAvail = T,
+            includeLegend = F)
+uhcdensplot(densdat = dens_xcoor_noprec$densdat,
+            densrand = dens_xcoor_noprec$densrand,
+            densavail = dens_xcoor_noprec$densavail,
+            includeAvail = T,
+            includeLegend = F)
+uhcdensplot(densdat = dens_ycoor_noprec$densdat,
+            densrand = dens_ycoor_noprec$densrand,
+            densavail = dens_ycoor_noprec$densavail,
+            includeAvail = T,
+            includeLegend = F)
+```
+
+
+### UHC plots for validating step-selection functions fit to moose location data
+
+Our last example illustrates how UHC plots can be constructed for step-selection functions fit to animal telemetry data.
