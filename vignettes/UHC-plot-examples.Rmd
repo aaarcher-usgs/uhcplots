@@ -4,7 +4,7 @@ author: "Althea ArchMiller and John Fieberg"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Intro to uhcplots}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -18,7 +18,7 @@ snipers or shots in the  dark? Ecology Letters.
  
 - create Used-Habitat Calibration (UHC) plots via cross-validation
 
-We begin by providing a short overview of the steps involved in creating UHC plots.  We then illustrate the functions in the *uhcplots* pacakge via three examples: 
+We begin by providing a short overview of the steps involved in creating UHC plots.  We then illustrate the functions in the *uhcplots* package via three examples: 
 
 1. UHC plots to explore the impact of a missing predictor using data splitting (simulation example from Fieberg et al. in review).
 2. UHC plots to explore the impact of a missing predictor using spatially-stratified cross-validation
@@ -143,8 +143,8 @@ testdat <- uhcdatasimulator(nused = nused_test,
 
 **Fit GLM Models to Training Data**
 
-Now, we fit two models, one with both x1 and x2 (i.e., "correct" model) 
-and one with just x1 (i.e., "missing predictor" model).
+Now, we fit two models, one with both $x_1$ and $x_2$ (i.e., "correct" model) 
+and one with just $x_1$ (i.e., "missing predictor" model).
 
 ```{r glm1a}
 # Correct model
@@ -352,10 +352,7 @@ if(top==1){
 ## Spatially-Stratified Cross validation
 
 For this example, we will again simulate data where the species distribution is driven by elevation ($x_1$) and precipitation ($x_2$) with the probability of selecting locations proportional to $\exp(0.5x_{1} - x_{2})$. We will first generate used and available points, then associate random ($x$, $y$) spatial coordinates to these points
- 
-```{r echo=FALSE}
-rm("simdat_train")
-```
+
 
 ```{r}
 # ### Specify Parameters
@@ -413,7 +410,7 @@ ggscatmat(simdat, columns = c("xcoord", "ycoord", "elev", "precip"))
 
 Lets look at the data spatially.
 
-```{r spatplot, fig.height= 4, fig.width=12, message=FALSE, warning=FALSE}
+```{r spatplot, fig.height= 3, fig.width=7, message=FALSE, warning=FALSE}
 bg<-"black" #background color of used points
 rc<-"yellow" #ring color of used points
 pch.u<-24 #pch for used points
@@ -497,10 +494,10 @@ simdat <- rbind(used_dat,avail_dat)
 table(simdat$kbin)
 ```
 
-Next, we make use of the *uhcsimXvalid* function to create our predicted distribution.  Note: tthis function takes the place of the *uhcsim* function and requires the following arguments:
+Next, we make use of the *uhcsimXvalid* function to create our predicted distribution.  Note: this function takes the place of the *uhcsim* function and requires the following arguments:
 
 - data_sim = the data set to be used in cross-validation
--  k_folds the number of bins to split data into
+-  k_folds = the number of bins to split data into
 -  nsims = the number of simulations (M) used to create the UHC plot.
 - nused = the number of used locations in the data set.
 - navail = the number of available locations in the data set (ie not used)
@@ -547,7 +544,7 @@ dens_ycoor_correct <- uhcdenscalc(rand_sims = uhcsim_correct[,,4],
 
 Now, we produce our UHCplots as before using *uhcdensplot*.
 
-```{r uhccorrectil, fig.width=12, fig.heigh=6}
+```{r uhccorrectil, fig.width=7, fig.heigh=4}
 par(mfrow=c(1,4))
 uhcdensplot(densdat = dens_elev_correct$densdat,
             densrand = dens_elev_correct$densrand,
@@ -616,7 +613,7 @@ dens_ycoor_noprec <- uhcdenscalc(rand_sims = uhcsim_noprec[,,4],
 
 And, finally, our UHC plot!  Clearly, the model without precipitation fails to predict the distribution of precipitation values or the distribution of locations in space.
 
-```{r uhcNoprecip, fig.width=12, fig.heigh=6}
+```{r uhcNoprecip, fig.width=7, fig.heigh=6}
 par(mfrow=c(1,4))
 uhcdensplot(densdat = dens_elev_noprec$densdat,
             densrand = dens_elev_noprec$densrand,
@@ -742,7 +739,7 @@ denshats.treedwt.full <- uhcdenscalc(rand_sims=xchoice.full[,,4],
 
 3. Then, we create UHC plots again using the *uhcdensplot* function
 
-```{r uhcmoosefull, fig.width=12, fig.height=4}
+```{r uhcmoosefull, fig.width=7, fig.height=4}
 par(mfrow=c(1,4), mar=c(4,2,2,2), oma=c(3, 4, 7, 0), bty="L")
 # First, the density plots
 uhcdensplot(densdat = denshats.decid.full$densdat, 
