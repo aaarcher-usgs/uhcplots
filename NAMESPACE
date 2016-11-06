@@ -19,3 +19,8 @@ importFrom(utils,remove.packages)
 importFrom("graphics", "abline", "legend", "lines", "plot", "polygon")
 importFrom("stats", "binomial", "coef", "glm", "quantile", "rnorm",
              "vcov")
+importFrom("dplyr", "%>%", "group_by", "sample_n")
+importFrom("dismo", "kfold")
+importFrom("SDMTools", "legend.gradient")
+importFrom("ENMeval", "get.block")
+importFrom("GGally", "ggscatmat")

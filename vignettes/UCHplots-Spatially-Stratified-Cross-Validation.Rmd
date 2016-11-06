@@ -1,0 +1,304 @@
+---
+title: "Using Spatially-Stratified Cross-Validation to Create UHC Plots"
+author: "Althea ArchMiller and John Fieberg"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Intro to uhcplots}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Spatially-Stratified Cross validation
+
+In this vignette, we demonstrate how one can use spatially-stratified cross validation to construct UHC plots.
+We will again simulate data where the species distribution is driven by elevation ($x_1$) and precipitation ($x_2$) with the probability of selecting locations proportional to $\exp(0.5x_{1} - x_{2})$. We will first generate used and available points, then associate random ($x$, $y$) spatial coordinates to these points
+
+
+```{r}
+library(uhcplots)
+
+# ### Specify Parameters
+
+# Global settings
+nused<- 100
+navail <- 10000
+ntemp <- 1000000
+nsims <- 1000 # M from paper
+
+# Example-specific settings
+example <- "missing predictor"       
+set.seed(1000)           
+betas <- c(0.5, -1)  
+xlabs <- c("Easting", "Northing")
+corx <--0.3                
+```
+
+Simulate data using the *uhcdatasimulator* function.  This time, we will only simulate one dataset and use cross-validation to explore model transferability.
+
+```{r}
+simdat <- uhcdatasimulator(nused = nused,     
+                             navail = navail,   
+                             betas = betas,
+                             corx = corx,       
+                             ntemp = ntemp,
+                             example = example)
+
+```
+
+Next, we generate x and y coordinates from uniform distributions and associated these coordinates with the used and available points.
+
+```{r}
+# Add in spatial coordinates, correlated with elev and precip
+xcoord <- runif(nrow(simdat),0,1)
+ycoord <- runif(nrow(simdat),0,1)
+
+xo<-order(simdat$elev*4+simdat$precip)
+simdat<-simdat[xo,]
+xo<-order(xcoord+rnorm(nrow(simdat), 0, 0.3))
+simdat$xcoord<-xcoord[xo]
+
+xo<-order(4*simdat$precip+simdat$elev)
+simdat<-simdat[xo,]
+xo<-order(ycoord+rnorm(nrow(simdat), 0, 0.3))
+simdat$ycoord<-ycoord[xo]
+```
+
+OK. Lets look at the correlations among our predictors and also their correlations with the ($x$, $y$) spatial coordinates.  This will require the GGally library.
+
+```{r galley, fig.height= 6, fig.width=6, message=FALSE, warning=FALSE}
+GGally::ggscatmat(simdat, columns = c("xcoord", "ycoord", "elev", "precip"))
+```
+
+Lets look at the data spatially.
+
+```{r spatplot, fig.height= 3, fig.width=7, message=FALSE, warning=FALSE}
+bg<-"black" #background color of used points
+rc<-"yellow" #ring color of used points
+pch.u<-24 #pch for used points
+par(oma=c(0,0,3,0), mar=c(5.1, 5.1, 4.1, 2.1),cex.lab=2, cex.main=2.4)
+layout(matrix(c(1,1,2,2,3), nrow=1))
+# Create a function to generate a continuous color palette
+rbPal <- colorRampPalette(c(rgb(1,0,0,0.5),rgb(0,0,1,0.5)),alpha=T)
+
+#Plot tra
+simdat$Col <- rbPal(10)[as.numeric(cut(simdat$elev,breaks = 10))]
+with(simdat[simdat$y==0,], 
+     plot(xcoord, ycoord,
+     col=simdat$Col, pch=20, cex=1,main="Elevation",
+     ylab=expression(paste(italic(y), "-coordinate")),
+     xlab=expression(paste(italic(x), "-coordinate"))))
+with(simdat[simdat$y==1,], 
+     points(xcoord, ycoord,
+           pch=pch.u, cex=1.8, col=rc, bg=bg))
+
+simdat$Col <- rbPal(10)[as.numeric(cut(simdat$precip,breaks = 10))]
+with(simdat[simdat$y==0,], 
+     plot(xcoord, ycoord,
+          col=simdat$Col, pch=20, cex=1,main="Precipitation",
+          ylab=expression(paste(italic(y), "-coordinate")),
+          xlab=expression(paste(italic(x), "-coordinate"))))
+with(simdat[simdat$y==1,], 
+     points(xcoord, ycoord,
+            pch=pch.u, cex=1.8, col=rc, bg=bg))
+rbPal <- colorRampPalette(c('red','blue'))
+
+plot(0:1, 0:1, type="n", bty="n", xaxt="n", yaxt="n", xlab="", ylab="")
+SDMTools::legend.gradient(cbind(x=c(0,.1,.10,0),y=c(1,1,0,0)),
+                          cols = colorRampPalette(c(rgb(1,0,0,0.5),
+                                                    rgb(0,0,1,0.5)),
+                                                  alpha=T)(10),
+                          title = "", limits=c("",""))
+text(0.1, 0.95, "High", cex=2, adj=0)
+text(0.1, 0.05, "Low", cex=2, adj=0)
+```
+
+### Spatially-stratified cross-validation
+
+To produce a UHC plot using cross-validation, we:
+
+1. Split our data into k folds (separate data sets).
+2. Loop from i = 1:k
+
+    a. Fit the data to all data EXCEPT the ith fold
+    b. Store $\hat{\beta}$ and $\widehat{\mathrm{cov}}(\hat{\beta})$ to characterize the uncertainty in the parameters (ignoring the intercept if using logistic regression).
+    c. Form M predicted distributions for the covariates in the ith fold.
+
+3. Combine all the predictions and then produce UHC plots as in the other examples using data splitting.
+
+Essentially, for each step in the process, we treat the $i^th$ fold as "test data" and the rest of the data as "training data".  Below, we illustrate this process using spatially-stratified folds.
+
+First, we will use the get.block function in the ENMeval package to produce spatially stratifed folds for cross-validation.
+
+```{r message=FALSE, warning=FALSE}
+# Settings for using uchsimXvalid.R
+ncovariates <- 4   
+model_form_correct <- "y~elev+precip"
+model_form_missingP <- "y~elev"
+z_colnames <- c("elev","precip","xcoord","ycoord")
+xmat_colnames_correct <- c("elev","precip")
+xmat_colnames_missingP <- c("elev")
+
+# First, separate "used" from "background" into separate data frames
+used_dat <- simdat[simdat$y==1,]
+avail_dat <- simdat[simdat$y==0,]
+
+#' Then, use "block" method to separate based on location of used data points
+temp_bins <- ENMeval::get.block(occ = used_dat[,c("xcoord","ycoord")],
+                          bg.coords = avail_dat[,c("xcoord","ycoord")])
+
+# Finally, associate the bins with the original data
+used_dat$kbin <- temp_bins$occ.grp
+avail_dat$kbin <- temp_bins$bg.grp
+simdat <- rbind(used_dat,avail_dat)
+table(simdat$kbin)
+```
+
+Next, we make use of the *uhcsimXvalid* function to create our predicted distribution.  Note: this function takes the place of the *uhcsim* function and requires the following arguments:
+
+- data_sim = the data set to be used in cross-validation
+-  k_folds = the number of bins to split data into
+-  nsims = the number of simulations (M) used to create the UHC plot.
+- nused = the number of used locations in the data set.
+- navail = the number of available locations in the data set (ie not used)
+-  ncovariates = the number of covariates or p in the model
+- model_form = the model in the form: "y~x1+x2+...+xp" (including quotations)
+- z_colnames = the column names of the environmental characteristics to be plotted with \code{uhcdensplot}. Takes the form: c("x1","x2",...,"xp")
+- xmat\_colnames = the column names of the environmental characteristics  that were used as predictors in the model\_form. Takes the form: c("x1","x2",...,"xp")
+
+
+```{r}
+uhcsim_correct <- uhcplots::uhcsimXvalid(data_sim = simdat,
+                                  k_folds = 4,
+                                  nsims = nsims,
+                                  nused = nused,
+                                  navail = navail,
+                                  ncovariates = 4,
+                                  model_form = model_form_correct,
+                                  z_colnames = z_colnames,
+                                  xmat_colnames = xmat_colnames_correct)
+
+# uhcdenscalc function for all variables
+dens_elev_correct <- uhcdenscalc(rand_sims = uhcsim_correct[,,1],
+                                dat = subset(simdat, 
+                                             y==1, select="elev"), 
+                                avail = subset(simdat, 
+                                               y==0, select="elev")) 
+dens_prec_correct <- uhcdenscalc(rand_sims = uhcsim_correct[,,2],
+                                dat = subset(simdat, 
+                                             y==1, select="precip"), 
+                                avail = subset(simdat, 
+                                               y==0, select="precip")) 
+dens_xcoor_correct <- uhcdenscalc(rand_sims = uhcsim_correct[,,3],
+                                dat = subset(simdat, 
+                                             y==1, select="xcoord"), 
+                                avail = subset(simdat, 
+                                               y==0, select="xcoord")) 
+dens_ycoor_correct <- uhcdenscalc(rand_sims = uhcsim_correct[,,4],
+                                 dat = subset(simdat, 
+                                              y==1, select="ycoord"), 
+                                 avail = subset(simdat, 
+                                                y==0, select="ycoord")) 
+
+```
+
+Now, we produce our UHCplots as before using *uhcdensplot*.
+
+```{r uhccorrectil, fig.width=7, fig.heigh=4}
+par(mfrow=c(1,4), oma=c(0,0,2,0))
+uhcdensplot(densdat = dens_elev_correct$densdat,
+            densrand = dens_elev_correct$densrand,
+            densavail = dens_elev_correct$densavail,
+            includeAvail = T,
+            includeLegend = F)
+   mtext(outer=F, side=2, line=3, "Density", cex=1)
+   mtext(outer=F, side=1, line=4, "Elevation", cex=1.0)
+uhcdensplot(densdat = dens_prec_correct$densdat,
+            densrand = dens_prec_correct$densrand,
+            densavail = dens_prec_correct$densavail,
+            includeAvail = T,
+            includeLegend = F)
+   mtext(outer=F, side=1, line=4, "Precipitation", cex=1.0)
+uhcdensplot(densdat = dens_xcoor_correct$densdat,
+            densrand = dens_xcoor_correct$densrand,
+            densavail = dens_xcoor_correct$densavail,
+            includeAvail = T,
+            includeLegend = F)  
+   mtext(outer=F, side=1, line=4, "x-coordinate", cex=1.0)
+uhcdensplot(densdat = dens_ycoor_correct$densdat,
+            densrand = dens_ycoor_correct$densrand,
+            densavail = dens_ycoor_correct$densavail,
+            includeAvail = T,
+            includeLegend = F)
+   mtext(outer=F, side=1, line=4, "y-coordinate", cex=1.0)
+   mtext(outer=T, side=3, line=-1.5,  expression(y %~% elev+precip), adj=0.5, cex=1.8)
+```
+
+
+Lets repeat the plots, but now for a model witout precipitation. 
+
+```{r}
+uhcsim_noprec <- uhcplots::uhcsimXvalid(data_sim = simdat,
+                                        k_folds = 4,
+                                        nsims = nsims,
+                                        nused = nused,
+                                        navail = navail,
+                                        ncovariates = 4,
+                                        model_form = model_form_missingP,
+                                        z_colnames = z_colnames,
+                                        xmat_colnames = xmat_colnames_missingP)
+
+# uhcdenscalc function for all variables
+dens_elev_noprec <- uhcdenscalc(rand_sims = uhcsim_noprec[,,1],
+                                dat = subset(simdat, 
+                                             y==1, select="elev"), 
+                                avail = subset(simdat, 
+                                               y==0, select="elev")) 
+dens_prec_noprec <- uhcdenscalc(rand_sims = uhcsim_noprec[,,2],
+                                dat = subset(simdat, 
+                                             y==1, select="precip"), 
+                                avail = subset(simdat, 
+                                               y==0, select="precip")) 
+dens_xcoor_noprec <- uhcdenscalc(rand_sims = uhcsim_noprec[,,3],
+                                 dat = subset(simdat, 
+                                              y==1, select="xcoord"), 
+                                 avail = subset(simdat, 
+                                                y==0, select="xcoord")) 
+dens_ycoor_noprec <- uhcdenscalc(rand_sims = uhcsim_noprec[,,4],
+                                 dat = subset(simdat, 
+                                              y==1, select="ycoord"), 
+                                 avail = subset(simdat, 
+                                                y==0, select="ycoord")) 
+```
+
+And, finally, our UHC plot!  Clearly, the model without precipitation fails to predict the distribution of precipitation values or the distribution of locations in space.
+
+```{r uhcNoprecip, fig.width=7, fig.heigh=6}
+par(mfrow=c(1,4), oma=c(0,0,2,0))
+uhcdensplot(densdat = dens_elev_noprec$densdat,
+            densrand = dens_elev_noprec$densrand,
+            densavail = dens_elev_noprec$densavail,
+            includeAvail = T,
+            includeLegend = F)
+   mtext(outer=F, side=2, line=3, "Density", cex=1)
+   mtext(outer=F, side=1, line=4, "Elevation", cex=1.0)
+uhcdensplot(densdat = dens_prec_noprec$densdat,
+            densrand = dens_prec_noprec$densrand,
+            densavail = dens_prec_noprec$densavail,
+            includeAvail = T,
+            includeLegend = F)
+   mtext(outer=F, side=1, line=4, "Precipitation", cex=1.0)
+uhcdensplot(densdat = dens_xcoor_noprec$densdat,
+            densrand = dens_xcoor_noprec$densrand,
+            densavail = dens_xcoor_noprec$densavail,
+            includeAvail = T,
+            includeLegend = F)
+   mtext(outer=F, side=1, line=4, "x-coordinate", cex=1.0)
+uhcdensplot(densdat = dens_ycoor_noprec$densdat,
+            densrand = dens_ycoor_noprec$densrand,
+            densavail = dens_ycoor_noprec$densavail,
+            includeAvail = T,
+            includeLegend = F)
+   mtext(outer=F, side=1, line=4, "y-coordinate", cex=1.0)
+   mtext(outer=T, side=3, line=-1.5,  expression(y %~% elev), adj=0.5, cex=1.8)
+```

@@ -17,9 +17,16 @@ Imports:
     MASS,
     KernSmooth,
     survival,
-    dplyr
+    dplyr,
+    dismo,
+    graphics,
+    stats,
+    SDMTools,
+    ENMeval,
+    GGally
 Suggests:
     testthat,
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+Depends: R(>= 2.10.0)
