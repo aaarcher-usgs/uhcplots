@@ -104,14 +104,14 @@ uhcdensplot(densdat = denscalc_elev_missingP$densdat,
            densrand = denscalc_elev_missingP$densrand,
            includeAvail = TRUE,
            densavail = denscalc_elev_missingP$densavail,includeLegend = FALSE)
-mtext(outer=F, side=1, line = 3, "Elevation")
+mtext(outer=FALSE, side=1, line = 3, "Elevation")
 
 uhcdensplot(densdat = denscalc_prec_missingP$densdat,
            densrand = denscalc_prec_missingP$densrand,
            includeAvail = TRUE,
            densavail = denscalc_prec_missingP$densavail,
            includeLegend = FALSE)
-mtext(outer=F, side=1, line= 3, "Precipitation")
+mtext(outer=FALSE, side=1, line= 3, "Precipitation")
 par(mai=c(0,0,0,0))
 plot.new()
 legend("center",c("Available", "Used", "Predicted"), lty = c(1,2,1),
