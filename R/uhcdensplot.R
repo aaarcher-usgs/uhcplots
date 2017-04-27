@@ -24,7 +24,7 @@
 #' @return A plot with a 95% simulation envelope (grey band) of the predicted
 #' density estimates for simulated data points and kernel density estimates of
 #' the environmental characteristics associated with the observed locations
-#' (red dashed line) and the available locations (black line).
+#' (solid black line) and the available locations (dashed red line).
 #'
 #' @seealso Full archive of the data and code necessary to replicate the
 #' manuscript at \url{http://doi.org/10.13020/D6T590}.
@@ -117,18 +117,18 @@ uhcdensplot <- function(densdat, densrand, includeAvail=F, densavail=NULL, xl=NU
   polygon(x = c(densdat$x, rev(densdat$x)),
           y = c(up.f, rev(low.f)), col="gray", border="gray")
   lines(densdat$x, densdat$y, ylim=yl, xlab="",
-        type="l", ylab="", col="red", lty=2, lwd=2)
+        type="l", ylab="", col="black", lty=1, lwd=2)
 
   # Include available if includeAvail=TRUE
   if (includeAvail==TRUE){
-    lines(densavail$x, densavail$y, lwd=2)
+    lines(densavail$x, densavail$y, lwd=2, lty=2, col="red")
   }
 
   if (includeAvail==TRUE & includeLegend==TRUE){
     legend(-5.2, max(alldens),
            c("Available", "Used", "Predicted"),
            lty = c(1,2,1),
-           col = c("black", "red", "grey"),
+           col = c("red", "black", "grey"),
            bty = "n",
            lwd = c(1,1,5))
   }
@@ -137,7 +137,7 @@ uhcdensplot <- function(densdat, densrand, includeAvail=F, densavail=NULL, xl=NU
     legend(-5.2, max(alldens),
            c("Used", "Predicted"),
            lty = c(2,1),
-           col = c("red", "grey"),
+           col = c("black", "grey"),
            bty = "n",
            lwd = c(1,5))
   }
