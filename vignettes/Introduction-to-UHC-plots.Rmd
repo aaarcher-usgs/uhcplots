@@ -247,7 +247,7 @@ par(mfrow=c(1,5), mar=c(2,2,2,2), oma=c(3, 0, 5, 0), bty="L")
     text(0.01, 0.52, "Test Data", cex=1, adj=0)
     text(0.2, 0.40, labcor2 , cex=1, adj=0) 
     legend(0.01, 0.35, c("Available", "Used", "Predicted"), 
-            lty = c(1, 2, 1), col = c("black", "red", "grey"), 
+            lty = c(1, 2, 1), col = c("red", "black", "grey"), 
             bty = "n", lwd = c(1, 1, 5))
 
 # Incorrect model (missing predictor)

@@ -106,8 +106,8 @@ denshats.treedwt.full <- uhcdenscalc(rand_sims=xchoice.full[,,4],
 
 3. Then, we create UHC plots again using the *uhcdensplot* function illustrating:
 
-- the distribution of covariates at the available points in the test data (black lines)
-- the distribution of covariates at the used points in the test data (red dotted lines)
+- the distribution of covariates at the available points in the test data (red dashed lines)
+- the distribution of covariates at the used points in the test data (solid black lines)
 - the predicted distribution of covariates at the used points in the test data (gray bands) 
 
 ```{r uhcmoosefull, fig.width=7, fig.height=4}
