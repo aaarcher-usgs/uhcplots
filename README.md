@@ -1,12 +1,12 @@
 # uhcplots
 
-**In Development** *These tools are being developed and have not yet been fully tested.*
 
-Create Used-Habitat Calibration Plots as described in Fieberg et al. (In review for Ecography).
+This package contains code for creating Used-Habitat Calibration Plots as described in: 
+
+Fieberg, J.R., Forester, J.D., Street, G.M., Johnson, D.H., ArchMiller, A.A. and Matthiopoulos, J., 2018. Used‐habitat calibration plots: a new procedure for validating species distribution, resource selection, and step‐selection models. Ecography, 41(5), pp.737-752.
 
 Programmer: John Fieberg | Secondary Programmer: Althea ArchMiller
 
-Fieberg, Forester, Street, Johnson, ArchMiller, and Matthiopoulos. In Review. Used-habitat calibration plots: A new procedure for validating species distribution, resource selection, and step-selection models. Ecography.
 
 ## Used-Habitat Calibration plots (UHC plots)
 
