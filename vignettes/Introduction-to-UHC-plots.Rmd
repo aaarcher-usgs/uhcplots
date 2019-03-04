@@ -16,7 +16,7 @@ This package contains functions that allow the user to:
  
 - create Used-Habitat Calibration (UHC) plots via cross-validation
 
-We begin by providing a short overview of the steps involved in creating UHC plots.  We then illustrate the functions in the *uhcplots* package with a simple simulation example from Fieberg et al. (in review).  Specifically, we show how UHC plots can be used to explore the impact of a missing predictor using data splitting.
+We begin by providing a short overview of the steps involved in creating UHC plots.  We then illustrate the functions in the *uhcplots* package with a simple simulation example from Fieberg et al. (2018).  Specifically, we show how UHC plots can be used to explore the impact of a missing predictor using data splitting.
 
 Other vignettes illustrate how UHC plots can be used to:
 
@@ -158,7 +158,7 @@ train.missingprecip <- glm(y ~ elev,
 **Create Predicted Distributions Using the *uhcsim* Function**
 
 Next, we create simulation envelopes for the environmental characteristics (elevation and precipitation) 
-at the observed locations in the test data using both models. As in the paper, we create 1000 predicted distributions (i.e., we set M = 1000 in step 4 of the process). Note, the *uhcim* function requires the following arguments:
+at the observed locations in the test data using both models. As in the paper, we create 1000 predicted distributions (i.e., we set M = 1000 in step 4 of the process). Note, the *uhcsim* function requires the following arguments:
 
 - nsims = number of predicted distributions to create (this is analogous to "M" in step 4)
 - nused_test = number of used points to select in the test data set

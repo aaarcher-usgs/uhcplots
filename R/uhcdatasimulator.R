@@ -3,7 +3,7 @@
 #' \code{uhcdatasimulator} simulates the data used in Fieberg et al. (In Review)
 #'
 #' This is a function that creates a dataframe based on the example
-#' chosen from the manuscript (Fieberg et al. In Review). In the first example,
+#' chosen from the manuscript (Fieberg et al. 2018). In the first example,
 #' ("missing predictor") the distribution of a species is related to elevation
 #' (\eqn{x_1}) and precipitation (\eqn{x_2}), where \eqn{x_1} and \eqn{x_2}
 #' are normally distributed with mean 0 and variance 4. We considered 3
