@@ -7,9 +7,7 @@ Authors@R: c(
     person("Althea", "ArchMiller", email="althea.archmiller@gmail.com",
     role=c("aut")))
 Description: R package to create UHC plots using simulated and empirical data
-    as described in Fieberg, Forester, Street, Johnson, ArchMiller, and
-    Matthiopoulos. (In Revision). Species distribution models predictive snipers
-    or shots in the dark? Ecology Letters.
+    as described in Fieberg, J.R., Forester, J.D., Street, G.M., Johnson, D.H., ArchMiller, A.A. and Matthiopoulos, J., 2018. Used‐habitat calibration plots: a new procedure for validating species distribution, resource selection, and step‐selection models. Ecography, 41(5), pp.737-752.
 License: MIT License
 LazyData: TRUE
 RoxygenNote: 5.0.1
