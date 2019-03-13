@@ -52,4 +52,3 @@ from Street et al. (2016).
 uhcsimstrat
 }
 \keyword{datasets}
-

@@ -13,16 +13,14 @@ Used-Habitat Calibration Plots (UHC Plots)
 
 Used-Habitat Calibration plots are a new method for model calibration that
 can be applied across a spectrum of species distribution models (SDMs)
-(Fieberg et al. In revision for Ecology Letters).
+(Fieberg et al. 2018).
 }
 
 \section{See also}{
 
 
 
-Fieberg, Forester, Street, Johnson, ArchMiller, and Matthiopoulos.
-In Review. Species distribution models: predictive snipers or shots in the
-dark? Ecology Letters.
+ Fieberg, J.R., Forester, J.D., Street, G.M., Johnson, D.H., ArchMiller, A.A. and Matthiopoulos, J., 2018. Used‐habitat calibration plots: a new procedure for validating species distribution, resource selection, and step‐selection models. Ecography, 41(5), pp.737-752.
 
 Full code to reproduce the paper at: <http://doi.org/10.13020/D6T590>
 }

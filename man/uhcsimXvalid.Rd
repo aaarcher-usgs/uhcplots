@@ -123,4 +123,3 @@ par<-opar
 Full archive of the data and code necessary to replicate the
 manuscript at \url{http://doi.org/10.13020/D6T590}.
 }
-

@@ -29,7 +29,7 @@ A dataframe of simulated data
 }
 \details{
 This is a function that creates a dataframe based on the example
-chosen from the manuscript (Fieberg et al. In Review). In the first example,
+chosen from the manuscript (Fieberg et al. 2018). In the first example,
 ("missing predictor") the distribution of a species is related to elevation
 (\eqn{x_1}) and precipitation (\eqn{x_2}), where \eqn{x_1} and \eqn{x_2}
 are normally distributed with mean 0 and variance 4. We considered 3
@@ -75,4 +75,3 @@ missingpredictor.P.data <- uhcdatasimulator(nused = 100,
 Full archive of the data and code necessary to replicate the
 manuscript at \url{http://doi.org/10.13020/D6T590}.
 }
-
