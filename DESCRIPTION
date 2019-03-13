@@ -1,6 +1,6 @@
 Package: uhcplots
 Type: Package
-Title: Used-Habitat Calibration plots (UHC plots)
+Title: Used-Habitat Calibration Plots (UHC Plots)
 Version: 0.1.0
 Authors@R: c(
     person("John", "Fieberg", email="jfieberg@umn.edu",role=c("aut","cre")),
@@ -10,7 +10,7 @@ Description: R package to create UHC plots using simulated and empirical data
     as described in Fieberg, Forester, Street, Johnson, ArchMiller and 
     Matthiopoulos. 2018. Used-habitat calibration plots: a new procedure for 
     validating species distribution, resource selection, and step-selection 
-    models. Ecography 41.
+    models. Ecography 41(5), pp.737-752.
 License: MIT License
 LazyData: TRUE
 RoxygenNote: 6.0.1
