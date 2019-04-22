@@ -24,7 +24,8 @@ Imports:
     stats,
     SDMTools,
     ENMeval,
-    GGally
+    GGally,
+    devtools
 Suggests:
     testthat,
     knitr,

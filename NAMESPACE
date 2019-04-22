@@ -16,6 +16,3 @@ importFrom(utils,modifyList)
 importFrom(utils,packageDescription)
 importFrom(utils,packageVersion)
 importFrom(utils,remove.packages)
- importFrom("graphics", "abline", "legend", "lines", "plot", "polygon")
-     importFrom("stats", "binomial", "coef", "glm", "quantile", "rnorm",
-                "vcov")
