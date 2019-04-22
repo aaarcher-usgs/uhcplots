@@ -13,7 +13,7 @@ Description: R package to create UHC plots using simulated and empirical data
     models. Ecography 41(5), pp.737-752.
 License: MIT License
 LazyData: TRUE
-RoxygenNote: 5.0.1
+RoxygenNote: 6.1.1
 Imports:
     MASS,
     KernSmooth,

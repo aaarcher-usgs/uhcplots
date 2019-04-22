@@ -4,8 +4,8 @@
 \alias{uhcsimXvalid}
 \title{uhcsimXvalid}
 \usage{
-uhcsimXvalid(data_sim, k_folds, nsims, nused, navail, ncovariates, model_form,
-  z_colnames, xmat_colnames)
+uhcsimXvalid(data_sim, k_folds, nsims, nused, navail, ncovariates,
+  model_form, z_colnames, xmat_colnames)
 }
 \arguments{
 \item{data_sim}{The data set to be used in cross-validation}
@@ -123,4 +123,3 @@ par<-opar
 Full archive of the data and code necessary to replicate the
 manuscript at \url{http://doi.org/10.13020/D6T590}.
 }
-

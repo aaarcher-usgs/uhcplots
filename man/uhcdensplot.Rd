@@ -31,7 +31,7 @@ be displayed.}
 A plot with a 95% simulation envelope (grey band) of the predicted
 density estimates for simulated data points and kernel density estimates of
 the environmental characteristics associated with the observed locations
-(red dashed line) and the available locations (black line).
+(solid black line) and the available locations (dashed red line).
 }
 \description{
 \code{uhcdensplot} creates UHC plots
@@ -110,4 +110,3 @@ uhcdensplot(densdat = denshats.misspec$densdat,
 Full archive of the data and code necessary to replicate the
 manuscript at \url{http://doi.org/10.13020/D6T590}.
 }
-
