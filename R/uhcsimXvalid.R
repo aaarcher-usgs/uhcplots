@@ -113,9 +113,8 @@ uhcsimXvalid <- function(data_sim,
                          model_form,
                          z_colnames,
                          xmat_colnames){
-
+  recordstot<-0
   x_sim_choice <- array(NA,dim=c(nsims, nused, ncovariates))
-
   for(kk in 1:k_folds){
     # a) Fit model
     (glm_fit <- glm(model_form, family=binomial(), data=data_sim[data_sim$k!=kk,]))
@@ -138,7 +137,8 @@ uhcsimXvalid <- function(data_sim,
     ntot_test <- nrow(xmat) # total number of test observations
 
     records <- 1:nused_test
-    records <- as.integer(records+(nused_test*(kk-1)))
+    records <- as.integer(recordstot+records)
+    recordstot<-recordstot+nused_test
     for(mm in 1:nsims){
       # c) Calculate probability of selection based on $\beta^i$
       wx_pred <- exp(as.matrix(xmat)%*%beta_hats[mm,])
