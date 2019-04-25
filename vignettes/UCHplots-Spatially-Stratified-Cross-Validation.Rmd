@@ -148,10 +148,10 @@ temp_bins <- ENMeval::get.block(occ = used_dat[,c("xcoord","ycoord")],
                           bg.coords = avail_dat[,c("xcoord","ycoord")])
 
 # Finally, associate the bins with the original data
-used_dat$kbin <- temp_bins$occ.grp
-avail_dat$kbin <- temp_bins$bg.grp
+used_dat$k <- temp_bins$occ.grp
+avail_dat$k <- temp_bins$bg.grp
 simdat <- rbind(used_dat,avail_dat)
-table(simdat$kbin)
+table(simdat$k)
 ```
 
 Next, we make use of the *uhcsimXvalid* function to create our predicted distribution.  Note: this function takes the place of the *uhcsim* function and requires the following arguments:
